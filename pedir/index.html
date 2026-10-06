@@ -66,7 +66,8 @@ textarea{min-height:76px;resize:vertical}
 .catb b{display:block;font-size:17px}
 .catb .d{display:block;color:var(--muted);font-size:13px;margin-top:2px}
 .catb .go{font-size:26px;color:var(--gold)}
-.sinal{background:#FFF6E0;border:1.5px solid #E2B84D;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:14px;line-height:1.45;color:#5c4510}.sinal>b:first-child{display:block;margin-bottom:4px;color:#7a5a00}
+.sinal{background:#FFF6E0;border:1.5px solid #E2B84D;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:14px;line-height:1.45;color:#5c4510}.sinal .s2{display:block;margin-top:8px;padding-top:8px;border-top:1px solid #EBD08A}
+.sinal>b:first-child{display:block;margin-bottom:4px;color:#7a5a00}
 .rm{font:inherit;border:0;background:var(--soft);color:var(--gold-d);width:24px;height:24px;border-radius:50%;margin-left:6px;cursor:pointer;font-weight:700;line-height:1}
 .ok.wait{background:var(--soft);color:var(--gold-d)}
 .sobre-b{font:inherit;width:100%;margin-top:6px;text-align:left;background:linear-gradient(135deg,#FBEFEF,#F4ECDD);border:1.5px dashed #E3B9B9;border-radius:20px;padding:14px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;cursor:pointer;color:var(--ink)}
@@ -219,7 +220,7 @@ async function enviar(){if(enviando)return;const ne=sel('encomenda'),ns=sel('est
  if(ne.length&&MODO==='entrega'&&$('#f-end').value.trim().length<5)return erro('Informe o endereço de entrega.');
  const curto=ne.find(p=>(+p.min||0)>1&&Q[p.id]<p.min);if(curto)return erro(`O pedido mínimo de ${curto.nome} é de ${curto.min} unidades.`);
  if($('#f-site').value)return fim(); /* campo invisível: só robôs preenchem */
- if(!OKSINAL){OKSINAL=true;$('#f-err').hidden=true;const a=$('#f-sinal');a.innerHTML=`<b>Atenção antes de enviar</b>${ne.length?`Seu pedido <b>só é confirmado após o pagamento do sinal de ${sinalPct()}%</b>. Ao enviar, você recebe pelo WhatsApp o valor final e os dados para pagamento. Sem o sinal, a data não fica reservada.`:`Este é um pedido de orçamento. A data <b>só é reservada após a aprovação do orçamento e o pagamento do sinal de ${sinalPct()}%</b>, combinados pelo WhatsApp.`}`;a.hidden=false;$('#f-env').textContent='Entendi, enviar pedido';$('#f-env').scrollIntoView({block:'end'});return}
+ if(!OKSINAL){OKSINAL=true;$('#f-err').hidden=true;const a=$('#f-sinal');a.innerHTML=`<b>Atenção antes de enviar</b>${ne.length?`Seu pedido <b>só é confirmado após o pagamento do sinal de ${sinalPct()}%</b>. Ao enviar, você recebe pelo WhatsApp o valor final e os dados para pagamento. Sem o sinal, a data não fica reservada.<span class="s2"><b>Em caso de desistência, o sinal não é devolvido.</b> Ao recebê-lo, reservamos a data e o horário e já começamos a nos preparar para o seu pedido.</span>`:`Este é um pedido de orçamento. A data <b>só é reservada após a aprovação do orçamento e o pagamento do sinal de ${sinalPct()}%</b>, combinados pelo WhatsApp.<span class="s2"><b>Em caso de desistência, o sinal não é devolvido.</b> Ao recebê-lo, reservamos a data e o horário e já começamos a nos preparar para o seu evento.</span>`}`;a.hidden=false;$('#f-env').textContent='Entendi, enviar pedido';$('#f-env').scrollIntoView({block:'end'});return}
  const base={nome,fone,data,hora,obs};const linhas=[];
  if(ne.length)linhas.push({loja_id:LOJA,dados:{...base,tipo:'encomenda',modo:MODO,endereco:MODO==='entrega'?$('#f-end').value.trim():'',itens:ne.map(p=>({p:p.id,nome:p.nome,q:Q[p.id],v:p.preco})),total:+total().toFixed(2)}});
  if(ns.length)linhas.push({loja_id:LOJA,dados:{...base,tipo:'estacao',modo:'entrega',endereco:$('#f-local').value.trim(),convidados:Math.max(0,Math.round(+$('#f-conv').value||0)),itens:ns.map(p=>({p:p.id,nome:p.nome,q:1,v:p.preco}))}});
