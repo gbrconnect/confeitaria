@@ -66,6 +66,7 @@ textarea{min-height:76px;resize:vertical}
 .catb b{display:block;font-size:17px}
 .catb .d{display:block;color:var(--muted);font-size:13px;margin-top:2px}
 .catb .go{font-size:26px;color:var(--gold)}
+.sinal{background:#FFF6E0;border:1.5px solid #E2B84D;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:14px;line-height:1.45;color:#5c4510}.sinal>b:first-child{display:block;margin-bottom:4px;color:#7a5a00}
 .rm{font:inherit;border:0;background:var(--soft);color:var(--gold-d);width:24px;height:24px;border-radius:50%;margin-left:6px;cursor:pointer;font-weight:700;line-height:1}
 .ok.wait{background:var(--soft);color:var(--gold-d)}
 .sobre-b{font:inherit;width:100%;margin-top:6px;text-align:left;background:linear-gradient(135deg,#FBEFEF,#F4ECDD);border:1.5px dashed #E3B9B9;border-radius:20px;padding:14px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;cursor:pointer;color:var(--ink)}
@@ -190,8 +191,8 @@ document.addEventListener('click',e=>{const t=e.target.closest('[data-a],[data-m
 document.addEventListener('change',e=>{if(e.target.dataset&&e.target.dataset.q)setQ(e.target.dataset.q,e.target.value)});
 $('#bar-b').onclick=form;
 function hojeISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
-let MODO='retirada';
-function form(){const ne=sel('encomenda'),ns=sel('estacao');if(!ne.length&&!ns.length)return;MODO='retirada';
+let MODO='retirada',OKSINAL=false;const sinalPct=()=>{const n=Math.round(+(V&&V.sinal));return n>0&&n<=100?n:50};
+function form(){const ne=sel('encomenda'),ns=sel('estacao');if(!ne.length&&!ns.length)return;MODO='retirada';OKSINAL=false;
  $('#ov').innerHTML=`<div class="ov" id="ovb"><div class="sheet" role="dialog" aria-label="Finalizar pedido">
  <h3>Finalizar pedido</h3><div class="note" style="margin-top:0">Preencha seus dados para a gente confirmar com você.</div>
  <div class="res"><b>Resumo</b><ul>${ne.map(p=>`<li><span>${Q[p.id]} × ${esc(p.nome)}</span><span>${brl(Q[p.id]*p.preco)} <button class="rm" type="button" data-rm="${esc(p.id)}" aria-label="Remover ${esc(p.nome)}">×</button></span></li>`).join('')}${ns.map(p=>`<li><span>${esc(p.nome)}</span><span>orçamento <button class="rm" type="button" data-rm="${esc(p.id)}" aria-label="Remover ${esc(p.nome)}">×</button></span></li>`).join('')}</ul>${ne.length?`<ul><li><b>Total dos produtos</b><b>${brl(total())}</b></li></ul>`:''}</div>
@@ -203,7 +204,7 @@ function form(){const ne=sel('encomenda'),ns=sel('estacao');if(!ne.length&&!ns.l
  <div id="f-end-w" hidden><label class="f">Endereço de entrega<input type="text" id="f-end" maxlength="200" autocomplete="street-address"></label><div class="note">A taxa do Uber é por conta da cliente. O valor é informado na confirmação do pedido.</div></div>`:''}
  ${ns.length?`<label class="f">Local da festa<input type="text" id="f-local" maxlength="200" placeholder="Endereço ou nome do salão"></label><label class="f">Número de convidados<input type="number" id="f-conv" min="0" max="5000" inputmode="numeric"></label>`:''}
  <label class="f">Observações<textarea id="f-obs" maxlength="600" placeholder="Sabores, cores, tema, nome do aniversariante..."></textarea></label>
- <div class="err" id="f-err" hidden></div>
+ <div class="err" id="f-err" hidden></div><div class="sinal" id="f-sinal" hidden></div>
  <div style="display:flex;gap:10px;margin-top:16px"><button class="btn" id="f-volta" type="button">Voltar</button><button class="btn pri" id="f-env" type="button" style="flex:1">Enviar pedido</button></div></div></div>`;
  $('#f-volta').onclick=()=>{$('#ov').innerHTML=''};$('#ovb').onclick=e=>{if(e.target.id==='ovb')$('#ov').innerHTML=''};
  if(ne.length){const m=x=>{MODO=x;$('#m-ret').classList.toggle('sel',x==='retirada');$('#m-ent').classList.toggle('sel',x==='entrega');$('#f-end-w').hidden=x!=='entrega'};$('#m-ret').onclick=()=>m('retirada');$('#m-ent').onclick=()=>m('entrega')}
@@ -218,16 +219,17 @@ async function enviar(){if(enviando)return;const ne=sel('encomenda'),ns=sel('est
  if(ne.length&&MODO==='entrega'&&$('#f-end').value.trim().length<5)return erro('Informe o endereço de entrega.');
  const curto=ne.find(p=>(+p.min||0)>1&&Q[p.id]<p.min);if(curto)return erro(`O pedido mínimo de ${curto.nome} é de ${curto.min} unidades.`);
  if($('#f-site').value)return fim(); /* campo invisível: só robôs preenchem */
+ if(!OKSINAL){OKSINAL=true;$('#f-err').hidden=true;const a=$('#f-sinal');a.innerHTML=`<b>Atenção antes de enviar</b>${ne.length?`Seu pedido <b>só é confirmado após o pagamento do sinal de ${sinalPct()}%</b>. Ao enviar, você recebe pelo WhatsApp o valor final e os dados para pagamento. Sem o sinal, a data não fica reservada.`:`Este é um pedido de orçamento. A data <b>só é reservada após a aprovação do orçamento e o pagamento do sinal de ${sinalPct()}%</b>, combinados pelo WhatsApp.`}`;a.hidden=false;$('#f-env').textContent='Entendi, enviar pedido';$('#f-env').scrollIntoView({block:'end'});return}
  const base={nome,fone,data,hora,obs};const linhas=[];
  if(ne.length)linhas.push({loja_id:LOJA,dados:{...base,tipo:'encomenda',modo:MODO,endereco:MODO==='entrega'?$('#f-end').value.trim():'',itens:ne.map(p=>({p:p.id,nome:p.nome,q:Q[p.id],v:p.preco})),total:+total().toFixed(2)}});
  if(ns.length)linhas.push({loja_id:LOJA,dados:{...base,tipo:'estacao',modo:'entrega',endereco:$('#f-local').value.trim(),convidados:Math.max(0,Math.round(+$('#f-conv').value||0)),itens:ns.map(p=>({p:p.id,nome:p.nome,q:1,v:p.preco}))}});
  enviando=true;const b=$('#f-env');b.disabled=true;b.textContent='Enviando...';
  try{const r=await sb.from('pedidos_site').insert(linhas);if(r.error)throw r.error;fim({nome,data,hora,ne:ne.map(p=>({n:p.nome,q:Q[p.id],t:Q[p.id]*p.preco})),ns:ns.map(p=>p.nome),total:total(),modo:ne.length?MODO:''})}
- catch(e){enviando=false;b.disabled=false;b.textContent='Enviar pedido';erro('Não foi possível enviar agora. Verifique a internet e tente de novo'+(V&&V.whatsapp?', ou fale com a gente pelo WhatsApp '+V.whatsapp:'')+'.')}}
+ catch(e){enviando=false;b.disabled=false;b.textContent='Entendi, enviar pedido';erro('Não foi possível enviar agora. Verifique a internet e tente de novo'+(V&&V.whatsapp?', ou fale com a gente pelo WhatsApp '+V.whatsapp:'')+'.')}}
 function fim(r){Q={};enviando=false;$('#bar').hidden=true;$('#ov').innerHTML='';window.scrollTo(0,0);
  const dbr=d=>/^\d{4}-\d{2}-\d{2}$/.test(d||'')?d.slice(8)+'/'+d.slice(5,7)+'/'+d.slice(0,4):'';let n=String(V&&V.whatsapp||'').replace(/\D/g,'');if(n.length===10||n.length===11)n='55'+n;
  const msg=r?`Olá! Acabei de fazer um pedido pelo site.\nNome: ${r.nome}\nPara o dia: ${dbr(r.data)}${r.hora?' às '+r.hora:''}\n`+r.ne.map(x=>`${x.q} × ${x.n}`).concat(r.ns.map(x=>`Orçamento: ${x}`)).join('\n'):'';
- $('#main').innerHTML=`<div class="center"><div class="ok wait">…</div><h3 style="color:var(--ink);margin:0 0 8px;font-size:22px">Pedido aguardando confirmação</h3><p style="max-width:420px;margin:0 auto 14px">Recebemos o seu pedido, mas ele <b>ainda não está confirmado</b>. Vamos conferir a data e responder pelo WhatsApp com o valor final e a forma de pagamento.</p>
+ $('#main').innerHTML=`<div class="center"><div class="ok wait">…</div><h3 style="color:var(--ink);margin:0 0 8px;font-size:22px">Pedido aguardando confirmação</h3><p style="max-width:420px;margin:0 auto 14px">Recebemos o seu pedido, mas ele <b>ainda não está confirmado</b>. Vamos conferir a data e responder pelo WhatsApp com o valor final. A confirmação acontece com o pagamento do sinal de ${sinalPct()}%.</p>
  ${r?`<div class="res" style="max-width:420px;margin:0 auto 16px;text-align:left"><b>Seu pedido</b><ul>${r.ne.map(x=>`<li><span>${x.q} × ${esc(x.n)}</span><span>${brl(x.t)}</span></li>`).join('')}${r.ns.map(x=>`<li><span>${esc(x)}</span><span>orçamento</span></li>`).join('')}</ul><ul>${r.ne.length?`<li><b>Total dos produtos</b><b>${brl(r.total)}</b></li>`:''}<li><span>Para o dia</span><span>${dbr(r.data)}${r.hora?' às '+esc(r.hora):''}</span></li>${r.modo?`<li><span>Recebimento</span><span>${r.modo==='entrega'?'Entrega por Uber':'Retirada'}</span></li>`:''}</ul></div>`:''}
  ${r&&n.length>=12?`<a class="btn pri" style="display:block;max-width:420px;margin:0 auto 10px;text-decoration:none;text-align:center" href="https://wa.me/${n}?text=${encodeURIComponent(msg)}" target="_blank" rel="noopener">Avisar pelo WhatsApp que fiz o pedido</a>`:''}<button class="btn" id="novo">Fazer outro pedido</button></div>`;
  $('#novo').onclick=()=>{VIEW=null;lista()}}
