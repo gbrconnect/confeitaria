@@ -2261,7 +2261,7 @@ function chegouRemoto(r){
 }
 function aposRemoto(){cacheLocal();if($('#modal-root').innerHTML)_remoto=true;else render()}
 async function recarregar(){if(!NUVEM||!LOJA||_syncSt!=='ok')return;try{const{data,error}=await sb.from('dados').select('loja_id,chave,valor').eq('loja_id',LOJA).not('chave','like','backup:%');if(error||!data)return;let mudou=false;for(const r of data)if(chegouRemoto(r))mudou=true;if(mudou)aposRemoto()}catch(e){}carregarSite()}
-function marcaLogin(){let mk='';try{const t=JSON.parse(localStorage.getItem(KEY)||'null');mk=(t&&t.exemplo===false&&t.config&&t.config.marca)||''}catch(e){}return`<div class="brand" style="border:0;padding-bottom:0"><div class="wm">${esc(mk||'GBR Connect')}</div><div class="sub">GESTÃO</div></div>`}
+function marcaLogin(){return`<div class="brand" style="border:0;padding-bottom:0"><div class="wm">GBR Connect</div><div class="sub">GESTÃO PARA CONFEITARIAS</div></div>`}
 function mostrarApp(sim){$('.app').hidden=!sim;$('#bottomnav').hidden=!sim;$('#login').hidden=sim}
 function telaLogin(msg){mostrarApp(false);
  $('#login').innerHTML=`<form class="login-card" onsubmit="event.preventDefault();fazerLogin()">${marcaLogin()}
