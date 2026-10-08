@@ -60,7 +60,7 @@ textarea{min-height:76px;resize:vertical}
 .res ul{list-style:none;margin:6px 0 0;padding:0}
 .note{font-size:13px;color:var(--muted);margin-top:8px}
 .err{color:var(--bad);font-size:13.5px;margin-top:10px;font-weight:600}
-.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .catb{font:inherit;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;display:grid;grid-template-columns:74px minmax(0,1fr) auto;gap:14px;align-items:center;cursor:pointer;color:var(--ink)}
 .catb:hover{border-color:var(--gold)}
 .catb b{display:block;font-size:17px}
@@ -94,6 +94,8 @@ textarea{min-height:76px;resize:vertical}
 .eu{width:190px;height:190px;border-radius:50%;margin:18px auto 8px;padding:6px;background:linear-gradient(135deg,#F3C9C9,#E2C48A);box-shadow:0 8px 22px rgba(60,40,20,.18)}
 .eu img{width:100%;height:100%;border-radius:50%;object-fit:cover;border:4px solid #fff;display:block}
 .oi{font-family:Caveat,cursive;font-size:34px;line-height:1.1;color:var(--ink)}
+.catb .d .pr{display:inline;font-size:13px;color:var(--gold-d)}
+.catb .vo{display:inline-block;margin-top:6px;font-size:12.5px;font-weight:700;color:var(--gold-d)}
 .catb .go.sm{font-size:13px;font-weight:700;color:var(--gold-d);white-space:nowrap}
 .tag{display:inline-block;margin-top:6px;background:var(--soft);color:var(--gold-d);font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px}
 .back{font:inherit;font-weight:700;font-size:15px;color:var(--gold-d);background:var(--card);border:1.5px solid var(--gold);border-radius:999px;padding:10px 18px;margin-top:14px;cursor:pointer;position:sticky;top:8px;z-index:5;box-shadow:0 2px 10px rgba(0,0,0,.08)}
@@ -154,7 +156,7 @@ function lista(){const cs=cats();
   document.querySelectorAll('[data-volta]').forEach(b=>b.onclick=()=>{GRP=null;lista();window.scrollTo(0,0)});barra();return}
  $('#main').innerHTML=(cs.length>1?`<button class="back" id="volta">‹ Voltar para todas as categorias</button>`:'')+`<h2>${esc(nomeCat(VIEW))}</h2><p class="h2s">${gs.length?'Toque em um grupo para ver todas as opções.':sub}</p>`
   +(gs.length?`<div class="cats">${gs.map(([g,a],i)=>{const f=a.find(x=>fotoOk(x.foto));const n=a.filter(x=>Q[x.id]>0).length;const pr=a.map(x=>x.preco).filter(v=>v>0);
-   return`<button class="catb" data-grp="${i}"><span class="ft">${f?`<img src="${f.foto}" alt="">`:esc(g[0]||'?').toUpperCase()}</span><span class="ct"><b>${esc(g)}</b><span class="d">${a.length} opções${pr.length?' · a partir de '+brl(Math.min(...pr)):''}</span>${n?`<span class="tag">${n} no pedido</span>`:''}</span><span class="go sm">Ver opções ›</span></button>`}).join('')}</div>`:'')
+   return`<button class="catb" data-grp="${i}"><span class="ft">${f?`<img src="${f.foto}" alt="">`:esc(g[0]||'?').toUpperCase()}</span><span class="ct"><b>${esc(g)}</b><span class="d">${a.length} opções</span>${pr.length?`<span class="d">a partir de <b class="pr">${brl(Math.min(...pr))}</b></span>`:''}<span class="vo">Ver opções</span>${n?`<span class="tag">${n} no pedido</span>`:''}</span><span class="go">›</span></button>`}).join('')}</div>`:'')
   +(soltos.length?(gs.length?`<h2 style="margin-top:22px">Mais produtos</h2><p class="h2s">${sub}</p>`:'')+`<div class="grid">${soltos.map(card).join('')}</div>`:'');
  window._gs=gs.map(g=>g[0]);
  const v=$('#volta');if(v)v.onclick=()=>{VIEW=null;GRP=null;lista();window.scrollTo(0,0)};
