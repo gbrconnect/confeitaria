@@ -131,6 +131,9 @@ label.f small,div.f small{font-weight:400}
 .chk{display:flex;align-items:center;gap:8px;font-size:13.5px;cursor:pointer}
 
 .tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.tbl-wrap thead th{position:sticky;top:0;z-index:3;box-shadow:inset 0 -1px 0 var(--line)}
+@media (min-width:861px){.tbl-wrap{overflow:visible}.tbl-wrap thead th:first-child{border-top-left-radius:var(--r)}.tbl-wrap thead th:last-child{border-top-right-radius:var(--r)}}
+@media (max-width:860px){.tbl-wrap{overflow:auto;max-height:72vh}}
 table{width:100%;border-collapse:collapse;font-size:13.5px}
 th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
 th{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--surface-2);white-space:nowrap}
