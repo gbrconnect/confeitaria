@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Servidor local para a animação Sweet Ka.
 
-Uso:  python3 servidor.py [porta]   →  abra http://localhost:8765/
+Uso:  python3 servidor.py [porta]   →  abra http://localhost:8765/ (stories)
+      ou http://localhost:8765/horizontal.html (16:9)
 
 - Serve a página (index.html) e o mp4-muxer local.
 - POST /save?name=arquivo   grava o corpo em ./saida/arquivo (quadros PNG de teste, MP4 do WebCodecs).
@@ -50,13 +51,15 @@ class H_(http.server.SimpleHTTPRequestHandler):
             return self._ok()
         if u.path == '/start':
             self._body()
-            saida = os.path.join(SAIDA, 'sweet-ka-logo.mp4')
+            w, h = int(q.get('w', [W])[0]), int(q.get('h', [H])[0])
+            fps = int(q.get('fps', [FPS])[0])
+            saida = os.path.join(SAIDA, os.path.basename(q.get('name', ['sweet-ka-logo.mp4'])[0]))
             cmd = ['ffmpeg', '-y', '-loglevel', 'error',
-                   '-f', 'rawvideo', '-pix_fmt', 'rgba', '-s', f'{W}x{H}', '-r', str(FPS), '-i', 'pipe:0',
+                   '-f', 'rawvideo', '-pix_fmt', 'rgba', '-s', f'{w}x{h}', '-r', str(fps), '-i', 'pipe:0',
                    '-i', os.path.join(SAIDA, 'trilha.wav'),
                    '-vf', 'scale=out_color_matrix=bt709:out_range=tv,format=yuv420p',
                    '-c:v', 'libx264', '-preset', 'slow', '-profile:v', 'high', '-level', '4.2', '-x264-params', 'aq-mode=3',
-                   '-b:v', '22M', '-maxrate', '26M', '-bufsize', '44M', '-g', '60',
+                   '-b:v', '22M', '-maxrate', '26M', '-bufsize', '44M', '-g', str(fps),
                    '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709', '-color_range', 'tv',
                    '-c:a', 'aac', '-b:a', '192k', '-ar', '48000',
                    '-movflags', '+faststart', '-shortest', saida]
