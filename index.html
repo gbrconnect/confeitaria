@@ -1217,7 +1217,7 @@ function pedidosView(fr){
  ${corpo}`;
 }
 function faixasTexto(p){const fx=parseFaixas(p.faixasTxt);if(!fx.length||!['pessoa','faixa'].includes(p.cobranca))return[];const mp=+p.minPes||0;const o=[];let ini=1;
- if(p.cobranca==='pessoa'&&mp>0&&fx[0]&&(fx[0][0]==null||fx[0][0]>mp)){o.push([`Até ${mp} pessoas`,brl(mp*fx[0][1])]);ini=mp+1}
+ if(p.cobranca==='pessoa'&&mp>0&&fx[0]&&fx[0][0]==null){o.push([`Até ${mp} pessoas`,brl(mp*fx[0][1])]);ini=mp+1}
  for(const [ate,v] of fx){const lab=ate==null?(ini<=1?'Qualquer quantidade':`A partir de ${ini} pessoas`):ini<=1?`Até ${ate} pessoas`:`De ${ini} a ${ate} pessoas`;o.push([lab,p.cobranca==='pessoa'?brl(v)+' por pessoa':brl(v)]);if(ate!=null)ini=ate+1}
  if(fx[fx.length-1][0]!=null)o.push([`Acima de ${ini-1} pessoas`,'sob consulta']);return o}
 function precosEstacao(){
