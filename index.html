@@ -404,6 +404,7 @@ details.inner[open] summary{margin-bottom:10px}
 @media (pointer:coarse){input,select,textarea{font-size:16px!important}}
 a.btn{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
 .exp{display:inline-flex;gap:6px}.exp .btn{color:var(--muted)}
+.combos{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}.combo{padding:16px}.combo-h{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px}.combo-h b{font-size:16px}.cb-t{width:100%;border-collapse:collapse;font-size:14px}.cb-t td{padding:7px 0;border-bottom:1px solid var(--line,#eee)}.cb-t td:last-child{text-align:right;font-weight:600;white-space:nowrap;padding-left:10px}.cb-s{margin:14px 0 6px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted,#888)}.cb-l{margin:0;padding-left:18px;font-size:14px;line-height:1.6}
 </style>
 
 </head>
@@ -824,7 +825,7 @@ async function carregarSlug(){SLUG_SITE='';if(!NUVEM||!LOJA)return;try{const r=a
 const siteNovos=()=>SITE.filter(x=>x.status==='novo');
 function siteBanner(){const n=siteNovos().length;return n?`<div class="car-banner" style="margin-bottom:12px"><div><div class="t">${n} pedido${n>1?'s':''} novo${n>1?'s':''} pelo site</div><div class="s">Abra para aceitar ou recusar. Ao aceitar, ele entra na agenda.</div></div><button class="btn" onclick="go('online')">${ico('online')}Ver pedidos</button></div>`:''}
 function vitrineDados(){const c=CFG();
- const ps=S.produtos.filter(p=>p.ativo!==false).map(p=>{const fs=frentesDe(p);if(fs.length&&!fs.includes('encomenda')&&!fs.includes('estacao'))return null;const tipo=fs.includes('estacao')&&!fs.includes('encomenda')?'estacao':'encomenda';if(tipo==='estacao'?p.catalogo===false:!noCatalogo(p))return null;return{id:p.id,nome:p.nome,desc:p.desc||'',preco:+p.preco||0,foto:p.foto||'',cat:p.cat||'',grupo:p.grupo||'',rotulo:p.precoRotulo||'',cob:p.cobranca||'',fx:parseFaixas(p.faixasTxt),mp:+p.minPes||0,tipo,min:Math.max(0,Math.round(+p.minimo||0))}}).filter(Boolean);
+ const ps=S.produtos.filter(p=>p.ativo!==false).map(p=>{const fs=frentesDe(p);if(fs.length&&!fs.includes('encomenda')&&!fs.includes('estacao'))return null;const tipo=fs.includes('estacao')&&!fs.includes('encomenda')?'estacao':'encomenda';if(tipo==='estacao'?p.catalogo===false:!noCatalogo(p))return null;return{id:p.id,nome:p.nome,desc:p.desc||'',preco:+p.preco||0,foto:p.foto||'',cat:p.cat||'',grupo:p.grupo||'',rotulo:p.precoRotulo||'',cob:'',fx:[],mp:+p.minPes||0,tipo,min:Math.max(0,Math.round(+p.minimo||0))}}).filter(Boolean);
  return{marca:c.marca||c.empresa||'',sub:c.marcaSub??'CONFEITARIA',logo:c.logo||'',whatsapp:c.whatsapp||'',instagram:c.instagram||'',aviso:c.avisoSite??AVISO_SITE,sinal:+c.sinalPct||50,produtos:ps}}
 async function publicarVitrine(){if(!NUVEM||!LOJA||!SITE_OK||!SLUG_SITE)return;const d=vitrineDados(),t=canon(d);if(t===_vit)return;try{const r=await sb.from('vitrine').upsert([{loja_id:LOJA,slug:SLUG_SITE,dados:d,atualizado_em:new Date().toISOString()}]);if(!r.error)_vit=t}catch(e){}}
 async function carregarSite(){if(!NUVEM||!LOJA)return;try{const r=await sb.from('pedidos_site').select('id,criado_em,status,dados').eq('loja_id',LOJA).order('criado_em',{ascending:false}).limit(60);if(r.error)return;const era=SITE_OK;SITE_OK=true;const a=canon(SITE.map(x=>[x.id,x.status]));SITE=r.data||[];if(!era||canon(SITE.map(x=>[x.id,x.status]))!==a){if($('#modal-root').innerHTML)_remoto=true;else render()}}catch(e){}}
@@ -859,7 +860,7 @@ function recusarSite(id){askConfirm('Recusar este pedido? Avise a cliente pelo W
 async function aceitarSite(id){
  const x=SITE.find(s=>s.id===id);if(!x||x.status!=='novo')return;const d=x.dados||{};
  if([...S.pedidos,...S.orcamentos].some(o=>o.origemSite===id)){await marcarSite(id,'aceito');render();return toast('Este pedido já tinha sido aceito.')}
- const itens=(Array.isArray(d.itens)?d.itens:[]).filter(i=>getProd(i.p)&&+i.q>0).map(i=>{const gp=getProd(i.p);const c=+i.n>0?calcCob(gp,+i.n):null;return{p:i.p,q:Math.min(99999,+i.q),v:c!=null?Math.round(c*100)/100:gp.preco}});
+ const itens=(Array.isArray(d.itens)?d.itens:[]).filter(i=>getProd(i.p)&&+i.q>0).map(i=>{const gp=getProd(i.p);const nn=+i.n>0?+i.n:(d.tipo==='estacao'?+d.convidados||0:0);const c=nn>0?calcCob(gp,nn):null;return{p:i.p,q:Math.min(99999,+i.q),v:c!=null?Math.round(c*100)/100:gp.preco}});
  if(!itens.length)return toast('Os produtos deste pedido não existem mais no cadastro. Recuse e fale com a cliente.','bad');
  const dig=t=>String(t||'').replace(/\D/g,'');let cli=S.clientes.find(c=>dig(c.fone).length>=8&&dig(c.fone)===dig(d.fone));
  if(!cli){cli={id:uid('c'),nome:String(d.nome||'Cliente do site').slice(0,80),fone:String(d.fone||'').slice(0,30),obs:'Chegou pelo site',criado:hoje()};S.clientes.push(cli)}
@@ -1198,22 +1199,35 @@ function cardPedido(p){
 }
 function pedidosView(fr){
  const est=fr==='estacao';const PS=S.pedidos.filter(p=>frenteDe(p)===fr);
- const T=hoje();let f=UI.pedFiltro;f=f==='pronto'||f==='prontos'?'prontos':f==='fim'||f==='entregue'||f==='cancelado'?'fim':'fazer';if(est&&f==='prontos')f='fazer';UI.pedFiltro=f;
+ const T=hoje();let f=UI.pedFiltro;f=f==='pronto'||f==='prontos'?'prontos':f==='fim'||f==='entregue'||f==='cancelado'?'fim':'fazer';if(est&&f==='prontos')f='fazer';if(est&&UI.pedFiltro==='precos')f='precos';if(!est&&UI.pedFiltro==='precos')f='fazer';UI.pedFiltro=f;
  const b=UI.pedBusca.toLowerCase();const bate=p=>!b||(`${p.num} ${nomeCli(p.cliente)} ${p.titulo} ${p.aniversariante}`).toLowerCase().includes(b);
  const fazer=PS.filter(p=>(est?['aguardando_sinal','confirmado','producao','pronto']:['aguardando_sinal','confirmado','producao']).includes(p.status));const prontos=est?[]:PS.filter(p=>p.status==='pronto');const fim=PS.filter(p=>['entregue','cancelado'].includes(p.status));
  const asc=(a,c)=>(a.dataEntrega+a.hora).localeCompare(c.dataEntrega+c.hora);let corpo='';
- if(f==='fazer'){
+ if(f==='precos')corpo=precosEstacao();
+ else if(f==='fazer'){
   const L=fazer.filter(bate).sort(asc);
   const grupos=[['Atrasados',p=>p.dataEntrega<T],['Hoje',p=>p.dataEntrega===T],['Amanhã',p=>p.dataEntrega===addDias(T,1)],['Próximos 7 dias',p=>p.dataEntrega>addDias(T,1)&&p.dataEntrega<=addDias(T,7)],['Mais para frente',p=>p.dataEntrega>addDias(T,7)]];
   corpo=grupos.map(([nome,fn])=>{const g=L.filter(fn);return g.length?`<div class="grp ${nome==='Atrasados'?'down':''}">${nome} <span>${g.length}</span></div><div class="list">${g.map(cardPedido).join('')}</div>`:''}).join('')||`<div class="empty">${est?'Nenhuma estação agendada. Toque em "Novo pedido" para registrar um evento.':'Nenhuma encomenda para fazer. Que tal criar uma nova?'}</div>`;
  }else if(f==='prontos'){const L=prontos.filter(bate).sort(asc);corpo=L.length?`<div class="list">${L.map(cardPedido).join('')}</div>`:'<div class="empty">Nenhuma encomenda pronta esperando a cliente.</div>'}
  else{const L=fim.filter(bate).sort((a,c)=>c.dataEntrega.localeCompare(a.dataEntrega)).slice(0,40);corpo=L.length?`<div class="list">${L.map(cardPedido).join('')}</div>`:`<div class="empty">${est?'Nenhum evento realizado ainda.':'Nenhuma encomenda finalizada ainda.'}</div>`}
- const tabs=est?[['fazer','Próximas',fazer.length],['fim','Realizadas',0]]:[['fazer','A fazer',fazer.length],['prontos','Prontos',prontos.length],['fim','Finalizados',0]];
+ const tabs=est?[['fazer','Próximas',fazer.length],['fim','Realizadas',0],['precos','Preços e pacotes',0]]:[['fazer','A fazer',fazer.length],['prontos','Prontos',prontos.length],['fim','Finalizados',0]];
  return head(est?'Estação Gourmet':'Encomendas',est?'A estação contratada por algumas horas para servir na festa da cliente. Registre o pacote, a data e o local.':'Toque no botão da encomenda para avançar a etapa, ou na encomenda para ver os detalhes.',`${est?`<button class="btn" onclick="cardapioEstacao()">${ico('pdf')}Cardápio</button>`:''}<button class="btn" onclick="editarDoc('orc',null,'${fr}')">${ico('orcamentos')}Orçamento</button><button class="btn pri" onclick="editarDoc('ped',null,'${fr}')">${ico('plus')}${est?'Novo pedido':'Nova encomenda'}</button>`)
  +`<div class="tabs">${tabs.map(([k,l,n])=>`<button class="${f===k?'on':''}" onclick="UI.pedFiltro='${k}';render()">${l}${n?` <span class="tabn">${n}</span>`:''}</button>`).join('')}</div>
- <div class="toolbar"><input type="search" class="search" id="ped-busca" placeholder="Buscar por cliente ou tema" value="${esc(UI.pedBusca)}" oninput="UI.pedBusca=this.value;rerenderKeep('ped-busca')"></div>
+ ${f==='precos'?'':`<div class="toolbar"><input type="search" class="search" id="ped-busca" placeholder="Buscar por cliente ou tema" value="${esc(UI.pedBusca)}" oninput="UI.pedBusca=this.value;rerenderKeep('ped-busca')"></div>`}
  ${corpo}`;
 }
+function faixasTexto(p){const fx=parseFaixas(p.faixasTxt);if(!fx.length||!['pessoa','faixa'].includes(p.cobranca))return[];const mp=+p.minPes||0;const o=[];let ini=1;
+ if(p.cobranca==='pessoa'&&mp>0&&fx[0]&&(fx[0][0]==null||fx[0][0]>mp)){o.push([`Até ${mp} pessoas`,brl(mp*fx[0][1])]);ini=mp+1}
+ for(const [ate,v] of fx){const lab=ate==null?(ini<=1?'Qualquer quantidade':`A partir de ${ini} pessoas`):ini<=1?`Até ${ate} pessoas`:`De ${ini} a ${ate} pessoas`;o.push([lab,p.cobranca==='pessoa'?brl(v)+' por pessoa':brl(v)]);if(ate!=null)ini=ate+1}
+ if(fx[fx.length-1][0]!=null)o.push([`Acima de ${ini-1} pessoas`,'sob consulta']);return o}
+function precosEstacao(){
+ const ps=S.produtos.filter(p=>p.ativo!==false&&frentesDe(p).includes('estacao')&&!p.adDe);
+ if(!ps.length)return'<div class="empty">Nenhum produto da Estação cadastrado.</div>';
+ return`<div class="small muted" style="margin:0 0 12px">Tabela interna para montar os orçamentos. A cliente não vê estes valores.</div><div class="combos">`+ps.map(p=>{const fx=faixasTexto(p);const inc=String(p.inclusos||'').split('\n').map(x=>x.trim()).filter(Boolean);const ad=S.produtos.filter(a=>a.adDe===p.id&&a.ativo!==false);
+  return`<div class="card combo"><div class="combo-h"><b>${esc(p.nome)}</b><button class="btn sm" onclick="abrirProduto('${p.id}')">Editar</button></div>
+  ${fx.length?`<table class="cb-t">${fx.map(([l,v])=>`<tr><td>${esc(l)}</td><td>${v}</td></tr>`).join('')}</table>`:`<div class="small muted">Sem tabela de preços. Preencha em Editar, no campo Faixas de preço.</div>`}
+  ${inc.length?`<div class="cb-s">Incluso</div><ul class="cb-l">${inc.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
+  ${ad.length?`<div class="cb-s">Adicionais</div><table class="cb-t">${ad.map(a=>`<tr><td>${esc(a.nome)}</td><td>${brl(a.preco)}</td></tr>`).join('')}</table>`:''}</div>`}).join('')+'</div>'}
 R.pedidos=()=>pedidosView('encomenda');
 R.estacao=()=>pedidosView('estacao');
 function rerenderKeep(id){const el=document.getElementById(id);const pos=el?el.selectionStart:0;render();const n=document.getElementById(id);if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(e){}}}
@@ -1618,9 +1632,11 @@ function abrirProduto(id){
   <label class="f">Categoria<input type="text" id="pr-cat" list="pr-cats" value="${esc(EP.cat)}"><datalist id="pr-cats">${cats.map(c=>`<option value="${esc(c)}">`).join('')}</datalist></label></div>
  <label class="f">Grupo na página de pedidos (opcional)<input type="text" id="pr-grupo" list="pr-grupos" value="${esc(EP.grupo||'')}" placeholder="Ex.: Brownies, Pudins, Bolos"><datalist id="pr-grupos">${[...new Set(S.produtos.map(p=>p.grupo).filter(Boolean))].sort().map(c=>`<option value="${esc(c)}">`).join('')}</datalist><span class="small muted">Produtos com o mesmo grupo aparecem juntos para a cliente, dentro da categoria.</span></label>
  <label class="f">Texto do preço na página de pedidos (opcional)<input type="text" id="pr-rotulo" maxlength="40" value="${esc(EP.precoRotulo||'')}" placeholder="Ex.: R$ 14 por pessoa"><span class="small muted">Substitui o preço mostrado para a cliente. Útil para preço por pessoa ou por faixa.</span></label>
- <div class="frow"><label class="f">Cobrança na página de pedidos (Estação)<select id="pr-cob"><option value="">Pedido de orçamento</option><option value="pessoa" ${EP.cobranca==='pessoa'?'selected':''}>Preço por pessoa</option><option value="faixa" ${EP.cobranca==='faixa'?'selected':''}>Pacote por faixa de pessoas</option></select></label>
+ <div class="frow"><label class="f">Tabela de preços (Estação)<select id="pr-cob"><option value="">Sem tabela</option><option value="pessoa" ${EP.cobranca==='pessoa'?'selected':''}>Preço por pessoa</option><option value="faixa" ${EP.cobranca==='faixa'?'selected':''}>Pacote por faixa de pessoas</option></select></label>
  <label class="f">Mínimo de pessoas (aparece na página)<input type="number" id="pr-minpes" min="0" value="${+EP.minPes||''}" placeholder="0"></label></div>
- <label class="f">Faixas de preço<input type="text" id="pr-faixas" value="${esc(EP.faixasTxt||'')}" placeholder="Ex.: 55:14; 70:13; 89:12; :10"><span class="small muted">Formato "até quantas pessoas : valor", separado por ponto e vírgula. Deixe o último sem número para "acima disso". Por pessoa: valor de cada pessoa. Por faixa: valor do pacote. A cliente informa o número de pessoas e vê o valor estimado.</span></label>
+ <label class="f">Faixas de preço<input type="text" id="pr-faixas" value="${esc(EP.faixasTxt||'')}" placeholder="Ex.: 55:14; 70:13; 89:12; :10"><span class="small muted">Formato "até quantas pessoas : valor", separado por ponto e vírgula. Deixe o último sem número para "acima disso". Por pessoa: valor de cada pessoa. Por faixa: valor do pacote. Uso interno: aparece na aba Preços da Estação e já calcula o valor quando um pedido de orçamento chega pelo site. A cliente não vê.</span></label>
+ <label class="f">O que está incluso (Estação)<textarea id="pr-incl" rows="4" placeholder="Um item por linha">${esc(EP.inclusos||'')}</textarea></label>
+ <label class="f">É adicional de<select id="pr-adde"><option value="">Não é adicional</option>${S.produtos.filter(x=>x.id!==EP.id&&frentesDe(x).includes('estacao')&&!x.adDe).map(x=>`<option value="${x.id}" ${EP.adDe===x.id?'selected':''}>${esc(x.nome)}</option>`).join('')}</select><span class="small muted">Para extras como marshmallow ou chocolate branco: aparecem abaixo do carrinho na aba Preços.</span></label>
  <div class="frow"><label class="f">Preço de venda (R$)<input type="text" inputmode="decimal" id="pr-preco" value="${n2(EP.preco)}" oninput="prUpd()"></label>
   <label class="f" id="pr-tempo-w" ${man?'hidden':''}>Tempo de produção por unidade (min)<input type="text" inputmode="decimal" id="pr-tempo" value="${nq(EP.tempo)}" oninput="prUpd()"></label>
   <div style="display:flex;flex-direction:column;gap:6px;justify-content:flex-end"><label class="chk" ${modOn('capacidade')?'':'hidden'}><input type="checkbox" id="pr-cap" ${EP.contaCap?'checked':''}> Conta na capacidade diária</label><label class="chk"><input type="checkbox" id="pr-ativo" ${EP.ativo!==false?'checked':''}> Produto ativo</label><label class="chk"><input type="checkbox" id="pr-catalogo" ${(EP.catalogo??(EP.cat!=='Adicionais'))?'checked':''}> Aparece no catálogo</label></div></div>
@@ -1668,7 +1684,7 @@ function prUpd(){
 }
 function prSalvar(){
  const nome=$('#pr-nome').value.trim();if(!nome)return toast('Informe o nome do produto.','bad');
- Object.assign(EP,{nome,cat:$('#pr-cat').value.trim()||'Outros',contaCap:$('#pr-cap').checked,ativo:$('#pr-ativo').checked,catalogo:$('#pr-catalogo').checked,frentes:Object.keys(FRENTES).filter(k=>$('#pr-fr-'+k).checked),minimo:Math.max(0,Math.round(num($('#pr-min').value)))||0,repasse:$('#pr-rep').checked,parceiro:$('#pr-rep').checked?($('#pr-parc').value.trim()||'Parceiro'):'',desc:$('#pr-desc').value.trim(),grupo:$('#pr-grupo').value.trim(),precoRotulo:$('#pr-rotulo').value.trim(),cobranca:$('#pr-cob').value,faixasTxt:$('#pr-faixas').value.trim(),minPes:Math.max(0,Math.round(+$('#pr-minpes').value||0))});
+ Object.assign(EP,{nome,cat:$('#pr-cat').value.trim()||'Outros',contaCap:$('#pr-cap').checked,ativo:$('#pr-ativo').checked,catalogo:$('#pr-catalogo').checked,frentes:Object.keys(FRENTES).filter(k=>$('#pr-fr-'+k).checked),minimo:Math.max(0,Math.round(num($('#pr-min').value)))||0,repasse:$('#pr-rep').checked,parceiro:$('#pr-rep').checked?($('#pr-parc').value.trim()||'Parceiro'):'',desc:$('#pr-desc').value.trim(),grupo:$('#pr-grupo').value.trim(),precoRotulo:$('#pr-rotulo').value.trim(),cobranca:$('#pr-cob').value,faixasTxt:$('#pr-faixas').value.trim(),minPes:Math.max(0,Math.round(+$('#pr-minpes').value||0)),inclusos:$('#pr-incl').value.trim(),adDe:$('#pr-adde').value});
  if(!EP.id){EP.id=uid('p');S.produtos.push(EP)}else{S.produtos[S.produtos.findIndex(p=>p.id===EP.id)]=EP}
  save();closeModal();render();toast('Produto salvo');
 }
