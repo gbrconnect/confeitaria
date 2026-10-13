@@ -860,7 +860,7 @@ function recusarSite(id){askConfirm('Recusar este pedido? Avise a cliente pelo W
 async function aceitarSite(id){
  const x=SITE.find(s=>s.id===id);if(!x||x.status!=='novo')return;const d=x.dados||{};
  if([...S.pedidos,...S.orcamentos].some(o=>o.origemSite===id)){await marcarSite(id,'aceito');render();return toast('Este pedido já tinha sido aceito.')}
- const itens=(Array.isArray(d.itens)?d.itens:[]).filter(i=>getProd(i.p)&&+i.q>0).map(i=>{const gp=getProd(i.p);const nn=+i.n>0?+i.n:(d.tipo==='estacao'?+d.convidados||0:0);const c=nn>0?calcCob(gp,nn):null;return{p:i.p,q:Math.min(99999,+i.q),v:c!=null?Math.round(c*100)/100:gp.preco}});
+ const itens=(Array.isArray(d.itens)?d.itens:[]).filter(i=>getProd(i.p)&&+i.q>0).map(i=>{const gp=getProd(i.p);const nn=+i.n>0?+i.n:(d.tipo==='estacao'?+d.convidados||0:0);const c=nn>0?calcCob(gp,nn):null;if(c!=null&&gp.cobranca==='pessoa')return{p:i.p,q:nn,v:Math.round(c/nn*100)/100};return{p:i.p,q:Math.min(99999,+i.q),v:c!=null?Math.round(c*100)/100:gp.preco}});
  if(!itens.length)return toast('Os produtos deste pedido não existem mais no cadastro. Recuse e fale com a cliente.','bad');
  const dig=t=>String(t||'').replace(/\D/g,'');let cli=S.clientes.find(c=>dig(c.fone).length>=8&&dig(c.fone)===dig(d.fone));
  if(!cli){cli={id:uid('c'),nome:String(d.nome||'Cliente do site').slice(0,80),fone:String(d.fone||'').slice(0,30),obs:'Chegou pelo site',criado:hoje()};S.clientes.push(cli)}
@@ -1362,7 +1362,7 @@ function editarDoc(kind,id,fr){
  <div class="frow"><label class="f">Data ${kind==='ped'&&!est?'da entrega':'do evento'}<input type="date" id="ed-data" value="${d.dataEntrega}" onchange="edUpd()"></label>
   <label class="f">${est?'Início':'Horário'}<input type="time" id="ed-hora" value="${d.hora}"></label>
   <label class="f" ${est?'hidden':''}>Forma<select id="ed-modo" onchange="$('#ed-end-w').hidden=this.value!=='entrega'"><option value="retirada" ${d.modo==='retirada'?'selected':''}>Retirada</option><option value="entrega" ${d.modo==='entrega'?'selected':''}>Entrega</option></select></label>
-  ${est?`<label class="f">Duração (horas)<input type="text" inputmode="decimal" id="ed-dur" value="${nq(d.duracao||3)}"></label><label class="f">Convidados<input type="text" inputmode="numeric" id="ed-conv" value="${d.convidados?nq(d.convidados):''}" placeholder="Opcional"></label>`:''}
+  ${est?`<label class="f">Duração (horas)<input type="text" inputmode="decimal" id="ed-dur" value="${nq(d.duracao||3)}"></label><label class="f">Convidados<input type="text" inputmode="numeric" id="ed-conv" value="${d.convidados?nq(d.convidados):''}" placeholder="Opcional" oninput="edConv()"></label>`:''}
   <label class="f" id="ed-end-w" ${d.modo==='entrega'?'':'hidden'}>${est?'Local da festa':'Endereço'}<input type="text" id="ed-end" value="${esc(d.endereco)}"></label></div>
  <div class="sec">${est?'Pacote e adicionais':'Itens'}</div>
  <div class="irow h"><span>Produto</span><span>Qtd</span><span>Preço un.</span><span class="tot">Total</span><span></span></div>
@@ -1381,12 +1381,14 @@ function edCli(v){$('#ed-novocli').hidden=v!=='__novo';if(v==='__novo')$('#ed-nc
 function prodOptions(sel,excl,fr){const ok=p=>p.ativo!==false&&(!fr||naFrente(p,fr)||p.id===sel);const cats=[...new Set(S.produtos.filter(ok).map(p=>p.cat))];return cats.map(c=>`<optgroup label="${esc(c)}">${S.produtos.filter(p=>p.cat===c&&ok(p)&&p.id!==excl).map(p=>`<option value="${p.id}" ${p.id===sel?'selected':''}>${esc(p.nome)}</option>`).join('')}</optgroup>`).join('')}
 function edItens(){
  $('#ed-itens').innerHTML=ED.d.itens.map((x,i)=>`<div class="irow"><select id="ed-p-${i}" onchange="edProd(${i},this.value)">${prodOptions(x.p,undefined,frenteDe(ED.d))}</select>
-  <input type="text" inputmode="decimal" id="ed-q-${i}" value="${nq(x.q)}" oninput="ED.d.itens[${i}].q=num(this.value);edUpd()">
+  <input type="text" inputmode="decimal" id="ed-q-${i}" value="${nq(x.q)}" oninput="ED.d.itens[${i}].q=num(this.value);edTab(${i});edUpd()">
   <input type="text" inputmode="decimal" id="ed-v-${i}" value="${n2(x.v)}" oninput="ED.d.itens[${i}].v=num(this.value);edUpd()">
   <span class="tot" id="ed-t-${i}">${brl(x.q*x.v)}</span><button class="x" title="Remover item" onclick="ED.d.itens.splice(${i},1);edItens()">${ico('x','width="16" height="16"')}</button></div>`).join('')||'<div class="muted small">Nenhum item. Adicione pelo botão abaixo.</div>';
  edUpd();
 }
-function edProd(i,v){ED.d.itens[i].p=v;ED.d.itens[i].v=getProd(v).preco;$('#ed-v-'+i).value=n2(ED.d.itens[i].v);edUpd()}
+function edProd(i,v){ED.d.itens[i].p=v;ED.d.itens[i].v=getProd(v).preco;const p=getProd(v);if(p&&p.cobranca==='pessoa'){const c=+num(($('#ed-conv')||{}).value||'')||0;if(c>0){ED.d.itens[i].q=c;$('#ed-q-'+i).value=nq(c)}}edTab(i);$('#ed-v-'+i).value=n2(ED.d.itens[i].v);edUpd()}
+function edTab(i){const x=ED.d.itens[i];const p=x&&getProd(x.p);if(!p||!['pessoa','faixa'].includes(p.cobranca))return;const n=p.cobranca==='pessoa'?+x.q||0:+num(($('#ed-conv')||{}).value||'')||0;if(!(n>0))return;const c=calcCob(p,n);if(c==null)return;x.v=p.cobranca==='pessoa'?Math.round(c/n*100)/100:c;const e=$('#ed-v-'+i);if(e&&document.activeElement!==e)e.value=n2(x.v)}
+function edConv(){const c=+num($('#ed-conv').value)||0;ED.d.itens.forEach((x,i)=>{const p=getProd(x.p);if(p&&p.cobranca==='pessoa'&&c>0){x.q=c;const q=$('#ed-q-'+i);if(q)q.value=nq(c)}edTab(i)});edUpd()}
 function edAdd(){const F=frenteDe(ED.d);const p0=S.produtos.find(x=>x.ativo!==false&&naFrente(x,F));if(!p0)return toast('Cadastre um produto em Produtos e preços para adicionar itens.','bad');ED.d.itens.push({p:p0.id,q:F==='estacao'?1:(p0.contaCap?50:1),v:p0.preco});edItens()}
 function edUpd(){
  const d=ED.d;d.desconto=num($('#ed-desc').value);d.frete=num($('#ed-frete').value);d.dataEntrega=$('#ed-data').value||d.dataEntrega;
