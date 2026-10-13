@@ -824,7 +824,7 @@ async function carregarSlug(){SLUG_SITE='';if(!NUVEM||!LOJA)return;try{const r=a
 const siteNovos=()=>SITE.filter(x=>x.status==='novo');
 function siteBanner(){const n=siteNovos().length;return n?`<div class="car-banner" style="margin-bottom:12px"><div><div class="t">${n} pedido${n>1?'s':''} novo${n>1?'s':''} pelo site</div><div class="s">Abra para aceitar ou recusar. Ao aceitar, ele entra na agenda.</div></div><button class="btn" onclick="go('online')">${ico('online')}Ver pedidos</button></div>`:''}
 function vitrineDados(){const c=CFG();
- const ps=S.produtos.filter(p=>p.ativo!==false).map(p=>{const fs=frentesDe(p);if(fs.length&&!fs.includes('encomenda')&&!fs.includes('estacao'))return null;const tipo=fs.includes('estacao')&&!fs.includes('encomenda')?'estacao':'encomenda';if(tipo==='estacao'?p.catalogo===false:!noCatalogo(p))return null;return{id:p.id,nome:p.nome,desc:p.desc||'',preco:+p.preco||0,foto:p.foto||'',cat:p.cat||'',grupo:p.grupo||'',rotulo:p.precoRotulo||'',tipo,min:Math.max(0,Math.round(+p.minimo||0))}}).filter(Boolean);
+ const ps=S.produtos.filter(p=>p.ativo!==false).map(p=>{const fs=frentesDe(p);if(fs.length&&!fs.includes('encomenda')&&!fs.includes('estacao'))return null;const tipo=fs.includes('estacao')&&!fs.includes('encomenda')?'estacao':'encomenda';if(tipo==='estacao'?p.catalogo===false:!noCatalogo(p))return null;return{id:p.id,nome:p.nome,desc:p.desc||'',preco:+p.preco||0,foto:p.foto||'',cat:p.cat||'',grupo:p.grupo||'',rotulo:p.precoRotulo||'',cob:p.cobranca||'',fx:parseFaixas(p.faixasTxt),mp:+p.minPes||0,tipo,min:Math.max(0,Math.round(+p.minimo||0))}}).filter(Boolean);
  return{marca:c.marca||c.empresa||'',sub:c.marcaSub??'CONFEITARIA',logo:c.logo||'',whatsapp:c.whatsapp||'',instagram:c.instagram||'',aviso:c.avisoSite??AVISO_SITE,sinal:+c.sinalPct||50,produtos:ps}}
 async function publicarVitrine(){if(!NUVEM||!LOJA||!SITE_OK||!SLUG_SITE)return;const d=vitrineDados(),t=canon(d);if(t===_vit)return;try{const r=await sb.from('vitrine').upsert([{loja_id:LOJA,slug:SLUG_SITE,dados:d,atualizado_em:new Date().toISOString()}]);if(!r.error)_vit=t}catch(e){}}
 async function carregarSite(){if(!NUVEM||!LOJA)return;try{const r=await sb.from('pedidos_site').select('id,criado_em,status,dados').eq('loja_id',LOJA).order('criado_em',{ascending:false}).limit(60);if(r.error)return;const era=SITE_OK;SITE_OK=true;const a=canon(SITE.map(x=>[x.id,x.status]));SITE=r.data||[];if(!era||canon(SITE.map(x=>[x.id,x.status]))!==a){if($('#modal-root').innerHTML)_remoto=true;else render()}}catch(e){}}
@@ -859,7 +859,7 @@ function recusarSite(id){askConfirm('Recusar este pedido? Avise a cliente pelo W
 async function aceitarSite(id){
  const x=SITE.find(s=>s.id===id);if(!x||x.status!=='novo')return;const d=x.dados||{};
  if([...S.pedidos,...S.orcamentos].some(o=>o.origemSite===id)){await marcarSite(id,'aceito');render();return toast('Este pedido já tinha sido aceito.')}
- const itens=(Array.isArray(d.itens)?d.itens:[]).filter(i=>getProd(i.p)&&+i.q>0).map(i=>({p:i.p,q:Math.min(99999,+i.q),v:getProd(i.p).preco}));
+ const itens=(Array.isArray(d.itens)?d.itens:[]).filter(i=>getProd(i.p)&&+i.q>0).map(i=>{const gp=getProd(i.p);const c=+i.n>0?calcCob(gp,+i.n):null;return{p:i.p,q:Math.min(99999,+i.q),v:c!=null?Math.round(c*100)/100:gp.preco}});
  if(!itens.length)return toast('Os produtos deste pedido não existem mais no cadastro. Recuse e fale com a cliente.','bad');
  const dig=t=>String(t||'').replace(/\D/g,'');let cli=S.clientes.find(c=>dig(c.fone).length>=8&&dig(c.fone)===dig(d.fone));
  if(!cli){cli={id:uid('c'),nome:String(d.nome||'Cliente do site').slice(0,80),fone:String(d.fone||'').slice(0,30),obs:'Chegou pelo site',criado:hoje()};S.clientes.push(cli)}
@@ -1618,6 +1618,9 @@ function abrirProduto(id){
   <label class="f">Categoria<input type="text" id="pr-cat" list="pr-cats" value="${esc(EP.cat)}"><datalist id="pr-cats">${cats.map(c=>`<option value="${esc(c)}">`).join('')}</datalist></label></div>
  <label class="f">Grupo na página de pedidos (opcional)<input type="text" id="pr-grupo" list="pr-grupos" value="${esc(EP.grupo||'')}" placeholder="Ex.: Brownies, Pudins, Bolos"><datalist id="pr-grupos">${[...new Set(S.produtos.map(p=>p.grupo).filter(Boolean))].sort().map(c=>`<option value="${esc(c)}">`).join('')}</datalist><span class="small muted">Produtos com o mesmo grupo aparecem juntos para a cliente, dentro da categoria.</span></label>
  <label class="f">Texto do preço na página de pedidos (opcional)<input type="text" id="pr-rotulo" maxlength="40" value="${esc(EP.precoRotulo||'')}" placeholder="Ex.: R$ 14 por pessoa"><span class="small muted">Substitui o preço mostrado para a cliente. Útil para preço por pessoa ou por faixa.</span></label>
+ <div class="frow"><label class="f">Cobrança na página de pedidos (Estação)<select id="pr-cob"><option value="">Pedido de orçamento</option><option value="pessoa" ${EP.cobranca==='pessoa'?'selected':''}>Preço por pessoa</option><option value="faixa" ${EP.cobranca==='faixa'?'selected':''}>Pacote por faixa de pessoas</option></select></label>
+ <label class="f">Mínimo de pessoas cobradas<input type="number" id="pr-minpes" min="0" value="${+EP.minPes||''}" placeholder="0"></label></div>
+ <label class="f">Faixas de preço<input type="text" id="pr-faixas" value="${esc(EP.faixasTxt||'')}" placeholder="Ex.: 55:14; 70:13; 89:12; :10"><span class="small muted">Formato "até quantas pessoas : valor", separado por ponto e vírgula. Deixe o último sem número para "acima disso". Por pessoa: valor de cada pessoa. Por faixa: valor do pacote. A cliente informa o número de pessoas e vê o valor estimado.</span></label>
  <div class="frow"><label class="f">Preço de venda (R$)<input type="text" inputmode="decimal" id="pr-preco" value="${n2(EP.preco)}" oninput="prUpd()"></label>
   <label class="f" id="pr-tempo-w" ${man?'hidden':''}>Tempo de produção por unidade (min)<input type="text" inputmode="decimal" id="pr-tempo" value="${nq(EP.tempo)}" oninput="prUpd()"></label>
   <div style="display:flex;flex-direction:column;gap:6px;justify-content:flex-end"><label class="chk" ${modOn('capacidade')?'':'hidden'}><input type="checkbox" id="pr-cap" ${EP.contaCap?'checked':''}> Conta na capacidade diária</label><label class="chk"><input type="checkbox" id="pr-ativo" ${EP.ativo!==false?'checked':''}> Produto ativo</label><label class="chk"><input type="checkbox" id="pr-catalogo" ${(EP.catalogo??(EP.cat!=='Adicionais'))?'checked':''}> Aparece no catálogo</label></div></div>
@@ -1665,7 +1668,7 @@ function prUpd(){
 }
 function prSalvar(){
  const nome=$('#pr-nome').value.trim();if(!nome)return toast('Informe o nome do produto.','bad');
- Object.assign(EP,{nome,cat:$('#pr-cat').value.trim()||'Outros',contaCap:$('#pr-cap').checked,ativo:$('#pr-ativo').checked,catalogo:$('#pr-catalogo').checked,frentes:Object.keys(FRENTES).filter(k=>$('#pr-fr-'+k).checked),minimo:Math.max(0,Math.round(num($('#pr-min').value)))||0,repasse:$('#pr-rep').checked,parceiro:$('#pr-rep').checked?($('#pr-parc').value.trim()||'Parceiro'):'',desc:$('#pr-desc').value.trim(),grupo:$('#pr-grupo').value.trim(),precoRotulo:$('#pr-rotulo').value.trim()});
+ Object.assign(EP,{nome,cat:$('#pr-cat').value.trim()||'Outros',contaCap:$('#pr-cap').checked,ativo:$('#pr-ativo').checked,catalogo:$('#pr-catalogo').checked,frentes:Object.keys(FRENTES).filter(k=>$('#pr-fr-'+k).checked),minimo:Math.max(0,Math.round(num($('#pr-min').value)))||0,repasse:$('#pr-rep').checked,parceiro:$('#pr-rep').checked?($('#pr-parc').value.trim()||'Parceiro'):'',desc:$('#pr-desc').value.trim(),grupo:$('#pr-grupo').value.trim(),precoRotulo:$('#pr-rotulo').value.trim(),cobranca:$('#pr-cob').value,faixasTxt:$('#pr-faixas').value.trim(),minPes:Math.max(0,Math.round(+$('#pr-minpes').value||0))});
  if(!EP.id){EP.id=uid('p');S.produtos.push(EP)}else{S.produtos[S.produtos.findIndex(p=>p.id===EP.id)]=EP}
  save();closeModal();render();toast('Produto salvo');
 }
@@ -1905,6 +1908,8 @@ function fechamentoPDF(k){
 }
 
 /* ============ RELATÓRIOS ============ */
+function parseFaixas(t){const o=[];for(const pt of String(t||'').split(/[;\n]+/)){const m=pt.trim().match(/^(\d*)\s*:\s*([\d.,]+)$/);if(m)o.push([m[1]?+m[1]:null,(v=>+(v.includes(',')?v.replace(/\./g,'').replace(',','.'):/\.\d{3}$/.test(v)?v.replace(/\./g,''):v))(m[2])])}return o.sort((a,b)=>(a[0]==null)-(b[0]==null)||a[0]-b[0])}
+function calcCob(p,n){const fx=parseFaixas(p&&p.faixasTxt);if(!p||!fx.length||!(n>0)||!['pessoa','faixa'].includes(p.cobranca))return null;const f=fx.find(x=>x[0]==null||n<=x[0]);if(!f)return null;return p.cobranca==='faixa'?f[1]:Math.max(n,+p.minPes||0)*f[1]}
 const AVISO_SITE='Faça seu pedido com antecedência. Doces personalizados e em pasta americana precisam de no mínimo 2 semanas. A data é confirmada pelo WhatsApp.';
 function relPeriodos(){const T=hoje(),k=T.slice(0,7);let a=UI.relDe||k+'-01',b=UI.relAte||T;if(a>b)[a,b]=[b,a];const f=d=>d.slice(8)+'/'+d.slice(5,7)+'/'+d.slice(0,4);
  return{mes:['Este mês',k+'-01',T],tri:['Últimos 3 meses',addMes(k,-2)+'-01',T],ano:['Últimos 12 meses',addMes(k,-11)+'-01',T],datas:[UI.relPer==='datas'?(a===b?f(a):f(a)+' a '+f(b)):'Escolher datas',a,b]}}
