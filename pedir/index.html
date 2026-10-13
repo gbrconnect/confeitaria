@@ -133,7 +133,7 @@ function cab(){const c=V||{};
 function card(p){const q=Q[p.id]||0;const est=p.tipo==='estacao';
  return`<div class="p ${q?'on':''}" id="p-${esc(p.id)}"><div class="ft">${fotoOk(p.foto)?`<img src="${p.foto}" alt="">`:esc((p.nome||'?').trim()[0]||'?').toUpperCase()}</div>
  <div><b>${esc(p.nome)}</b>${p.desc?`<span class="d">${esc(p.desc)}</span>`:''}${!est&&p.min>1?`<span class="tag">Pedido mínimo: ${p.min} unidades</span>`:''}
- <div class="row"><span class="v">${est?(p.preco>0?'a partir de '+brl(p.preco):'Sob consulta'):brl(p.preco)}</span>
+ <div class="row"><span class="v">${p.rotulo?esc(p.rotulo):est?(p.preco>0?'a partir de '+brl(p.preco):'Sob consulta'):brl(p.preco)}</span>
  ${est?`<button class="btn ${q?'sel':''}" data-est="${esc(p.id)}">${q?'Selecionado':'Quero orçamento'}</button>`
  :`<span class="qt"><button data-m="${esc(p.id)}" aria-label="Menos">−</button><input type="number" inputmode="numeric" min="0" max="5000" value="${q||''}" placeholder="0" data-q="${esc(p.id)}" aria-label="Quantidade de ${esc(p.nome)}"><button data-a="${esc(p.id)}" aria-label="Mais">+</button></span>`}</div></div></div>`}
 const catDe=p=>p.tipo==='estacao'?EST:(p.cat||'Produtos');
