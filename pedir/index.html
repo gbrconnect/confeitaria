@@ -135,12 +135,11 @@ const cobOk=p=>p&&p.tipo==='estacao'&&(p.cob==='pessoa'||p.cob==='faixa')&&Array
 function calcEst(p,n){if(!cobOk(p)||!(n>0))return null;const f=p.fx.find(x=>x[0]==null||n<=x[0]);if(!f)return null;if(p.cob==='faixa')return +f[1];const mp=+p.mp||0;return Math.max(n,mp)*(+f[1])}
 const estTotal=()=>sel('estacao').reduce((s,p)=>s+(calcEst(p,Q[p.id])||0),0);
 const waNum=()=>{let n=String(V&&V.whatsapp||'').replace(/\D/g,'');if(n.length===10||n.length===11)n='55'+n;return n.length>=12?n:''};
-const waOrc=p=>`https://wa.me/${waNum()}?text=${encodeURIComponent(`Olá! Vim pela página de pedidos e gostaria de um orçamento para: ${p.nome}.\n\nData da festa: \nNúmero de convidados: \nLocal: `)}`;
 function card(p){const q=Q[p.id]||0;const est=p.tipo==='estacao';const cob=cobOk(p);const et=cob?calcEst(p,q):null;
  return`<div class="p ${q?'on':''}" id="p-${esc(p.id)}"><div class="ft">${fotoOk(p.foto)?`<img src="${p.foto}" alt="">`:esc((p.nome||'?').trim()[0]||'?').toUpperCase()}</div>
  <div><b>${esc(p.nome)}</b>${p.desc?`<span class="d">${esc(p.desc)}</span>`:''}${!est&&p.min>1?`<span class="tag">Pedido mínimo: ${p.min} unidades</span>`:''}${est&&!cob&&p.mp>0?`<span class="tag">Mínimo de ${p.mp} pessoas</span>`:''}
  <div class="row"><span class="v">${p.rotulo?esc(p.rotulo):est?(p.preco>0?'a partir de '+brl(p.preco):'Sob consulta'):brl(p.preco)}</span>
- ${cob?`<span class="qt"><button data-m="${esc(p.id)}" aria-label="Menos">−</button><input type="number" inputmode="numeric" min="0" max="5000" value="${q||''}" placeholder="0" data-q="${esc(p.id)}" aria-label="Pessoas para ${esc(p.nome)}"><button data-a="${esc(p.id)}" aria-label="Mais">+</button></span>`:est&&waNum()?`<a class="btn wa" href="${waOrc(p)}" target="_blank" rel="noopener">Solicite orçamento</a>`:est?`<button class="btn ${q?'sel':''}" data-est="${esc(p.id)}">${q?'Selecionado':'Quero orçamento'}</button>`
+ ${cob?`<span class="qt"><button data-m="${esc(p.id)}" aria-label="Menos">−</button><input type="number" inputmode="numeric" min="0" max="5000" value="${q||''}" placeholder="0" data-q="${esc(p.id)}" aria-label="Pessoas para ${esc(p.nome)}"><button data-a="${esc(p.id)}" aria-label="Mais">+</button></span>`:est?`<button class="btn wa" data-orc="${esc(p.id)}">Solicite orçamento</button>`:est?`<button class="btn ${q?'sel':''}" data-est="${esc(p.id)}">${q?'Selecionado':'Quero orçamento'}</button>`
  :`<span class="qt"><button data-m="${esc(p.id)}" aria-label="Menos">−</button><input type="number" inputmode="numeric" min="0" max="5000" value="${q||''}" placeholder="0" data-q="${esc(p.id)}" aria-label="Quantidade de ${esc(p.nome)}"><button data-a="${esc(p.id)}" aria-label="Mais">+</button></span>`}</div>${cob?`<div class="estc">${q?(et!=null?`${q} ${q===1?'pessoa':'pessoas'} · <b>${brl(et)}</b> estimado`:`${q} pessoas · valor sob consulta`):'Informe o número de pessoas para ver o valor'}</div>`:''}</div></div>`}
 const catDe=p=>p.tipo==='estacao'?EST:(p.cat||'Produtos');
 function cats(){const m=new Map();for(const p of prods()){const k=catDe(p);if(!m.has(k))m.set(k,[]);m.get(k).push(p)}const a=[...m.entries()].filter(([k])=>k!==EST).sort((x,y)=>x[0].localeCompare(y[0],'pt-BR'));if(m.has(EST))a.push([EST,m.get(EST)]);return a}
@@ -156,7 +155,7 @@ function lista(){const cs=cats();
  const gm=new Map();for(const p of ps){const g=(p.grupo||'').trim();if(g){if(!gm.has(g))gm.set(g,[]);gm.get(g).push(p)}}
  const gs=[...gm.entries()].filter(([,a])=>a.length>1);const emG=new Set(gs.flatMap(([,a])=>a.map(p=>p.id)));const soltos=ps.filter(p=>!emG.has(p.id));
  if(GRP!=null&&!gs.find(g=>g[0]===GRP))GRP=null;
- const sub=est?'Nossa estação vai até a sua festa e serve os convidados por algumas horas. '+(waNum()?'Escolha o carrinho e solicite seu orçamento pelo WhatsApp.':'Selecione o pacote para receber um orçamento.')+'':'Informe a quantidade de cada produto.';
+ const sub=est?'Nossa estação vai até a sua festa e serve os convidados por algumas horas. Escolha o carrinho e solicite seu orçamento.':'Informe a quantidade de cada produto.';
  if(GRP!=null){const gp=gs.find(g=>g[0]===GRP)[1];
   $('#main').innerHTML=`<button class="back" data-volta>‹ Voltar para ${esc(nomeCat(VIEW))}</button><div class="crumb">${esc(nomeCat(VIEW))} › ${esc(GRP)}</div><h2>${esc(GRP)}</h2><p class="h2s">${gp.length} opções. ${sub}</p><div class="grid">${gp.map(card).join('')}</div><button class="back back2" data-volta>‹ Ver outros produtos de ${esc(nomeCat(VIEW))}</button>`;
   document.querySelectorAll('[data-volta]').forEach(b=>b.onclick=()=>{GRP=null;lista();window.scrollTo(0,0)});barra();return}
@@ -236,6 +235,44 @@ async function enviar(){if(enviando)return;const ne=sel('encomenda'),ns=sel('est
  enviando=true;const b=$('#f-env');b.disabled=true;b.textContent='Enviando...';
  try{const r=await sb.from('pedidos_site').insert(linhas);if(r.error)throw r.error;fim({nome,data,hora,ne:ne.map(p=>({n:p.nome,q:Q[p.id],t:Q[p.id]*p.preco})),ns:ns.map(p=>cobOk(p)?`${p.nome} (${Q[p.id]} pessoas${calcEst(p,Q[p.id])!=null?', '+brl(calcEst(p,Q[p.id]))+' estimado':''})`:p.nome),total:total(),modo:ne.length?MODO:''})}
  catch(e){enviando=false;b.disabled=false;b.textContent='Entendi, enviar pedido';erro('Não foi possível enviar agora. Verifique a internet e tente de novo'+(V&&V.whatsapp?', ou fale com a gente pelo WhatsApp '+V.whatsapp:'')+'.')}}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-orc]');if(!t)return;const p=prods().find(x=>x.id===t.dataset.orc);if(p)orcForm(p)});
+function orcForm(p){
+ $('#ov').innerHTML=`<div class="ov" id="ovb"><div class="sheet" role="dialog" aria-label="Solicitar orçamento">
+ <h3>Solicitar orçamento</h3><div class="note" style="margin-top:0">${esc(p.nome)}. Conte um pouco sobre a sua festa e a gente responde pelo WhatsApp com o valor.</div>
+ <label class="f">Seu nome<input type="text" id="o-nome" maxlength="80" autocomplete="name"></label>
+ <label class="f">Seu WhatsApp com DDD<input type="tel" id="o-fone" maxlength="20" inputmode="tel" autocomplete="tel" placeholder="(47) 90000-0000"></label>
+ <input class="hp" type="text" id="o-site" tabindex="-1" autocomplete="off" aria-hidden="true">
+ <div class="two"><label class="f">Data da festa<input type="date" id="o-data" min="${hojeISO()}"></label><label class="f">Horário<input type="time" id="o-hora"></label></div>
+ <label class="f">Número de convidados<input type="number" id="o-conv" min="1" max="5000" inputmode="numeric" placeholder="${p.mp>0?'Mínimo de '+p.mp+' pessoas':''}"></label>
+ <label class="f">Local da festa<input type="text" id="o-local" maxlength="200" placeholder="Salão ou endereço, com a cidade"></label>
+ <label class="f">Observações<textarea id="o-obs" maxlength="600" placeholder="Tema, tipo de festa, alguma preferência..."></textarea></label>
+ <div class="note">A data só fica reservada após a aprovação do orçamento e o pagamento do sinal de ${sinalPct()}%. Em caso de desistência, o sinal não é devolvido.</div>
+ <div class="err" id="f-err" hidden></div>
+ <div style="display:flex;gap:10px;margin-top:16px"><button class="btn" id="o-volta" type="button">Voltar</button><button class="btn pri" id="o-env" type="button" style="flex:1">${waNum()?'Enviar pelo WhatsApp':'Enviar pedido de orçamento'}</button></div></div></div>`;
+ $('#o-volta').onclick=()=>{$('#ov').innerHTML=''};$('#ovb').onclick=e=>{if(e.target.id==='ovb')$('#ov').innerHTML=''};
+ $('#o-env').onclick=()=>orcEnviar(p);$('#o-nome').focus()}
+async function orcEnviar(p){if(enviando)return;
+ const v=id=>$(id).value.trim();const nome=v('#o-nome'),fone=v('#o-fone'),data=$('#o-data').value,hora=$('#o-hora').value,conv=Math.round(+$('#o-conv').value||0),local=v('#o-local'),obs=v('#o-obs');
+ if(nome.length<2)return erro('Informe o seu nome.');
+ if(fone.replace(/\D/g,'').length<10)return erro('Informe o seu WhatsApp com DDD.');
+ if(!data)return erro('Informe a data da festa.');
+ if(!(conv>0))return erro('Informe o número de convidados.');
+ if(p.mp>0&&conv<p.mp)return erro(`O mínimo para ${p.nome} é de ${p.mp} pessoas.`);
+ if(local.length<3)return erro('Informe o local da festa.');
+ if($('#o-site').value)return fim();
+ const dbr=d=>d.slice(8)+'/'+d.slice(5,7)+'/'+d.slice(0,4);
+ const msg=`Olá! Vim pela página de pedidos e gostaria de um orçamento.\n\n*${p.nome}*\nNome: ${nome}\nData da festa: ${dbr(data)}${hora?' às '+hora:''}\nConvidados: ${conv}\nLocal: ${local}`+(obs?`\nObservações: ${obs}`:'');
+ const n=waNum(),link=n?`https://wa.me/${n}?text=${encodeURIComponent(msg)}`:'';
+ enviando=true;const b=$('#o-env');b.disabled=true;b.textContent='Enviando...';
+ let ok=true;try{const r=await sb.from('pedidos_site').insert([{loja_id:LOJA,dados:{nome,fone,data,hora,obs,tipo:'estacao',modo:'entrega',endereco:local,convidados:conv,itens:[{p:p.id,nome:p.nome,q:1,v:p.preco}],total:0}}]);if(r.error)throw r.error}catch(e){ok=false}
+ enviando=false;
+ if(!ok&&!link){b.disabled=false;b.textContent='Enviar pedido de orçamento';return erro('Não foi possível enviar agora. Verifique a internet e tente de novo.')}
+ Q={};$('#bar').hidden=true;$('#ov').innerHTML='';window.scrollTo(0,0);
+ $('#main').innerHTML=`<div class="center"><div class="ok wait">…</div><h3 style="color:var(--ink);margin:0 0 8px;font-size:22px">${link?'Falta só enviar no WhatsApp':'Pedido de orçamento enviado'}</h3><p style="max-width:420px;margin:0 auto 14px">${link?'Abrimos o WhatsApp com a sua mensagem pronta. Se ele não abriu, toque no botão abaixo e envie a mensagem para receber o seu orçamento.':'Recebemos o seu pedido e vamos responder pelo WhatsApp com o valor.'}</p>
+ <div class="res" style="max-width:420px;margin:0 auto 16px;text-align:left"><b>${esc(p.nome)}</b><ul><li><span>Data da festa</span><span>${dbr(data)}${hora?' às '+esc(hora):''}</span></li><li><span>Convidados</span><span>${conv}</span></li><li><span>Local</span><span>${esc(local)}</span></li></ul></div>
+ ${link?`<a class="btn wa" style="display:block;max-width:420px;margin:0 auto 10px;text-align:center" href="${link}" target="_blank" rel="noopener">Abrir o WhatsApp</a>`:''}<button class="btn" id="novo">Voltar para a página</button></div>`;
+ $('#novo').onclick=()=>{VIEW=null;lista()};
+ if(link)location.href=link}
 function fim(r){Q={};enviando=false;$('#bar').hidden=true;$('#ov').innerHTML='';window.scrollTo(0,0);
  const dbr=d=>/^\d{4}-\d{2}-\d{2}$/.test(d||'')?d.slice(8)+'/'+d.slice(5,7)+'/'+d.slice(0,4):'';let n=String(V&&V.whatsapp||'').replace(/\D/g,'');if(n.length===10||n.length===11)n='55'+n;
  const msg=r?`Olá! Acabei de fazer um pedido pelo site.\nNome: ${r.nome}\nPara o dia: ${dbr(r.data)}${r.hora?' às '+r.hora:''}\n`+r.ne.map(x=>`${x.q} × ${x.n}`).concat(r.ns.map(x=>`Orçamento: ${x}`)).join('\n'):'';
