@@ -1332,7 +1332,20 @@ function aprovarOrc(id){
  S.pedidos.push(p);o.status='aprovado';o.pedidoId=p.id;save();toast(`Pedido #${num} criado a partir do orçamento`);render();verPedido(p.id);
 }
 function primeiroNome(id){return(nomeCli(id).split(' ')[0])||''}
-function linhasItens(o){return o.itens.map(x=>`• ${nq(x.q)} × ${(getProd(x.p)||{}).nome||'?'}: ${brl(x.q*x.v)}`).join('\n')}
+function linhasItens(o){
+ const simples=x=>`• ${nq(x.q)} × ${(getProd(x.p)||{}).nome||'?'}: ${brl(x.q*x.v)}`;
+ if(frenteDe(o)!=='estacao')return o.itens.map(simples).join('\n');
+ const usados=new Set();const out=[];const conv=+o.convidados||0;
+ o.itens.forEach((x,i)=>{const p=getProd(x.p)||{};if(p.adDe&&o.itens.some(y=>y.p===p.adDe))return;usados.add(i);
+  let l;if(p.cobranca==='pessoa')l=`• ${p.nome}: ${nq(x.q)} pessoas × ${brl(x.v)} = ${brl(x.q*x.v)}`;
+  else if(p.cobranca==='faixa')l=`• ${p.nome}${conv?` (${nq(conv)} convidados)`:''}${x.q>1?` × ${nq(x.q)}`:''}: ${brl(x.q*x.v)}`;
+  else l=x.q===1?`• ${p.nome}: ${brl(x.v)}`:simples(x);
+  out.push(l);
+  const inc=String(p.inclusos||'').split('\n').map(t=>t.trim()).filter(Boolean);if(inc.length)out.push(`   Inclui: ${inc.join(', ')}.`);
+  const ads=o.itens.filter(y=>(getProd(y.p)||{}).adDe===x.p);
+  if(ads.length){out.push('   Adicionais:');ads.forEach(y=>out.push(`   + ${y.q>1?nq(y.q)+' × ':''}${getProd(y.p).nome}: ${brl(y.q*y.v)}`))}
+  out.push('')});
+ return out.join('\n').replace(/\n+$/,'')}
 function msgOrc(o){const t=totaisDoc(o);const c=CFG();
  return`Olá, ${primeiroNome(o.cliente)}! Tudo bem?\nSegue o orçamento da ${c.empresa} para ${o.titulo} (${SEMLONGO[toDate(o.dataEntrega).getDay()]}, ${dBR(o.dataEntrega)}):\n\n${linhasItens(o)}\n${o.desconto?`\nDesconto: - ${brl(o.desconto)}`:''}${o.frete?`\nEntrega: ${brl(o.frete)}`:''}\n*Total: ${brl(t.total)}*\n\nPara reservar a data, pedimos um sinal de ${o.sinalPct||c.sinalPct}% (${brl(t.total*(o.sinalPct||c.sinalPct)/100)}) via Pix. O restante é pago na ${o.modo==='entrega'?'entrega':'retirada'}.\nOrçamento válido até ${dBR(o.validade)}.\n\nQualquer dúvida, é só chamar!\n${c.empresa} · ${c.instagram}`}
 function msgPedido(id){const p=S.pedidos.find(x=>x.id===id);const t=totaisDoc(p);const c=CFG();
@@ -1377,13 +1390,20 @@ function editarDoc(kind,id,fr){
   `<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn pri" onclick="edSalvar()">${id?'Salvar alterações':'Criar '+nd[1]}</button>`,true);
  edItens();
 }
+function edExtras(x){if(frenteDe(ED.d)!=='estacao')return'';const p=getProd(x.p)||{};if(p.adDe)return'';
+ const inc=String(p.inclusos||'').split('\n').map(t=>t.trim()).filter(Boolean);
+ const ads=S.produtos.filter(a=>a.adDe===p.id&&a.ativo!==false);if(!inc.length&&!ads.length)return'';
+ return`<div class="small" style="margin:-2px 0 6px;padding:8px 12px;background:var(--bg2,#f7f2ea);border-radius:10px;line-height:1.5">
+ ${inc.length?`<div class="muted"><b>Inclui:</b> ${esc(inc.join(', '))}</div>`:''}
+ ${ads.length?`<div style="margin-top:${inc.length?6:0}px;display:flex;flex-wrap:wrap;gap:6px;align-items:center"><b>Acréscimos:</b>${ads.map(a=>{const on=ED.d.itens.some(y=>y.p===a.id);return`<label style="display:inline-flex;gap:5px;align-items:center;padding:3px 9px;border:1px solid var(--line,#e5dccd);border-radius:20px;cursor:pointer;background:${on?'#f1e3cc':'#fff'}"><input type="checkbox" ${on?'checked':''} onchange="edAd('${a.id}',this.checked)" style="margin:0">${esc(a.nome)} <span class="muted">${brl(a.preco)}</span></label>`}).join('')}</div>`:''}</div>`}
+function edAd(id,on){const a=getProd(id);if(on){if(!ED.d.itens.some(y=>y.p===id))ED.d.itens.push({p:id,q:1,v:a.preco})}else ED.d.itens=ED.d.itens.filter(y=>y.p!==id);edItens()}
 function edCli(v){$('#ed-novocli').hidden=v!=='__novo';if(v==='__novo')$('#ed-nc-nome').focus()}
 function prodOptions(sel,excl,fr){const ok=p=>p.ativo!==false&&(!fr||naFrente(p,fr)||p.id===sel);const cats=[...new Set(S.produtos.filter(ok).map(p=>p.cat))];return cats.map(c=>`<optgroup label="${esc(c)}">${S.produtos.filter(p=>p.cat===c&&ok(p)&&p.id!==excl).map(p=>`<option value="${p.id}" ${p.id===sel?'selected':''}>${esc(p.nome)}</option>`).join('')}</optgroup>`).join('')}
 function edItens(){
  $('#ed-itens').innerHTML=ED.d.itens.map((x,i)=>`<div class="irow"><select id="ed-p-${i}" onchange="edProd(${i},this.value)">${prodOptions(x.p,undefined,frenteDe(ED.d))}</select>
   <input type="text" inputmode="decimal" id="ed-q-${i}" value="${nq(x.q)}" oninput="ED.d.itens[${i}].q=num(this.value);edTab(${i});edUpd()">
   <input type="text" inputmode="decimal" id="ed-v-${i}" value="${n2(x.v)}" oninput="ED.d.itens[${i}].v=num(this.value);edUpd()">
-  <span class="tot" id="ed-t-${i}">${brl(x.q*x.v)}</span><button class="x" title="Remover item" onclick="ED.d.itens.splice(${i},1);edItens()">${ico('x','width="16" height="16"')}</button></div>`).join('')||'<div class="muted small">Nenhum item. Adicione pelo botão abaixo.</div>';
+  <span class="tot" id="ed-t-${i}">${brl(x.q*x.v)}</span><button class="x" title="Remover item" onclick="ED.d.itens.splice(${i},1);edItens()">${ico('x','width="16" height="16"')}</button></div>${edExtras(x)}`).join('')||'<div class="muted small">Nenhum item. Adicione pelo botão abaixo.</div>';
  edUpd();
 }
 function edProd(i,v){ED.d.itens[i].p=v;ED.d.itens[i].v=getProd(v).preco;const p=getProd(v);if(p&&p.cobranca==='pessoa'){const c=+num(($('#ed-conv')||{}).value||'')||0;if(c>0){ED.d.itens[i].q=c;$('#ed-q-'+i).value=nq(c)}}edTab(i);$('#ed-v-'+i).value=n2(ED.d.itens[i].v);edUpd()}
@@ -2143,10 +2163,13 @@ function gerarPDF(kind,id){
  const cQ=R-78,cU=R-40,cT=R-4;
  const cabTab=()=>{fc(PC.goldSoft);doc.rect(M,y,R-M,8.5,'F');label('Item',M+4,y+5.6);label('Qtd',cQ,y+5.6,'right');label('Valor unit.',cU,y+5.6,'right');label('Total',cT,y+5.6,'right');y+=8.5};
  cabTab();
- o.itens.forEach((x,i)=>{const nome=(getProd(x.p)||{}).nome||'Item';font('normal',10,PC.ink);const ls=doc.splitTextToSize(nome,cQ-M-22);const rh=Math.max(10,ls.length*4.6+5.2);
+ const estD=frenteDe(o)==='estacao';
+ o.itens.forEach((x,i)=>{const pp=getProd(x.p)||{};const nome=(estD&&pp.adDe?'+ ':'')+(pp.nome||'Item')+(estD&&pp.cobranca==='pessoa'?' (por pessoa)':'')+(estD&&pp.adDe?' (adicional)':'');font('normal',10,PC.ink);const ls=doc.splitTextToSize(nome,cQ-M-22);
+  const incT=estD&&!pp.adDe?String(pp.inclusos||'').split('\n').map(t=>t.trim()).filter(Boolean).join(', '):'';font('normal',8,PC.muted);const li=incT?doc.splitTextToSize('Inclui: '+incT+'.',cQ-M-22):[];
+  const rh=Math.max(10,ls.length*4.6+5.2+li.length*3.6+(li.length?1:0));
   if(y+rh>FOOT-10){novaPagina();cabTab()}
   if(i%2===1){fc([251,250,252]);doc.rect(M,y,R-M,rh,'F')}
-  doc.text(ls,M+4,y+6.3);font('normal',10,PC.ink);doc.text(nq(x.q),cQ,y+6.3,{align:'right'});tc(PC.muted);doc.text(brl(x.v),cU,y+6.3,{align:'right'});font('bold',10,PC.ink);doc.text(brl(x.q*x.v),cT,y+6.3,{align:'right'});
+  font('normal',10,PC.ink);doc.text(ls,M+4,y+6.3);if(li.length){font('normal',8,PC.muted);doc.text(li,M+4,y+6.3+ls.length*4.6);font('normal',10,PC.ink)}font('normal',10,PC.ink);doc.text(nq(x.q),cQ,y+6.3,{align:'right'});tc(PC.muted);doc.text(brl(x.v),cU,y+6.3,{align:'right'});font('bold',10,PC.ink);doc.text(brl(x.q*x.v),cT,y+6.3,{align:'right'});
   dc(PC.line);doc.setLineWidth(0.2);doc.line(M,y+rh,R,y+rh);y+=rh});
  y+=8;
  // totais (direita) + condições (esquerda)
