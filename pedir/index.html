@@ -162,7 +162,7 @@ function lista(){const cs=cats();
  $('#main').innerHTML=(cs.length>1?`<button class="back" id="volta">‹ Voltar para todas as categorias</button>`:'')+`<h2>${esc(nomeCat(VIEW))}</h2><p class="h2s">${gs.length?'Toque em um grupo para ver todas as opções.':sub}</p>`
   +(gs.length?`<div class="cats">${gs.map(([g,a],i)=>{const f=a.find(x=>fotoOk(x.foto));const n=a.filter(x=>Q[x.id]>0).length;const pr=a.map(x=>x.preco).filter(v=>v>0);
    return`<button class="catb" data-grp="${i}"><span class="ft">${f?`<img src="${f.foto}" alt="">`:esc(g[0]||'?').toUpperCase()}</span><span class="ct"><b>${esc(g)}</b><span class="d">${a.length} opções</span>${pr.length?`<span class="d">a partir de <b class="pr">${brl(Math.min(...pr))}</b></span>`:''}<span class="vo">Ver opções</span>${n?`<span class="tag">${n} no pedido</span>`:''}</span><span class="go">›</span></button>`}).join('')}</div>`:'')
-  +(soltos.length?(gs.length?`<h2 style="margin-top:22px">Mais produtos</h2><p class="h2s">${sub}</p>`:'')+`<div class="grid">${soltos.map(card).join('')}</div>`:'');
+  +(soltos.length?`<div class="grid"${gs.length?' style="margin-top:14px"':''}>${soltos.map(card).join('')}</div>`:'');
  window._gs=gs.map(g=>g[0]);
  const v=$('#volta');if(v)v.onclick=()=>{VIEW=null;GRP=null;lista();window.scrollTo(0,0)};
  barra()}
