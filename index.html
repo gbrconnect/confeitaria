@@ -733,7 +733,7 @@ const UI={pedFiltro:'ativos',pedBusca:'',orcFiltro:'ativos',orcBusca:'',siteBusc
 
 function badges(){
  const al=alertas();
- return{painel:al.filter(a=>!a.fin&&a.lvl!=='info').length,painelFin:al.filter(a=>a.fin).length,orcamentos:S.orcamentos.filter(o=>o.status==='aberto').length,pedidos:S.pedidos.filter(p=>p.status==='aguardando_sinal'&&frenteDe(p)==='encomenda').length,estacao:S.pedidos.filter(p=>p.status==='aguardando_sinal'&&frenteDe(p)==='estacao').length,online:siteNovos().length};
+ return{painel:0,painelFin:al.filter(a=>a.fin).length,orcamentos:S.orcamentos.filter(o=>o.status==='aberto').length,pedidos:S.pedidos.filter(p=>p.status==='aguardando_sinal'&&frenteDe(p)==='encomenda').length,estacao:S.pedidos.filter(p=>p.status==='aguardando_sinal'&&frenteDe(p)==='estacao').length,online:siteNovos().length};
 }
 function renderNav(){
  const b=badges();const c=CFG();const mk=esc(c.marca||'Sweet Ka');
