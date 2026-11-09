@@ -122,7 +122,7 @@ const SB_URL='https://shurvutfxgynqmgmkbgv.supabase.co',SB_KEY='sb_publishable_2
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const brl=v=>(+v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-const fotoOk=f=>/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(f||'')||/^https:\/\/[a-z0-9-]+\.github\.io\/fotos\/[a-z0-9-]+\.(jpg|png|webp)$/.test(f||'');
+const fotoOk=f=>/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(f||'')||/^https:\/\/[a-z0-9-]+\.github\.io\/(?:[a-z0-9-]+\/)?fotos\/[a-z0-9-]+\.(jpg|png|webp)$/.test(f||'');
 let sb=null,LOJA=null,V=null,Q={},enviando=false,VIEW=null,GRP=null;const EST='\u0000estacao';
 const prods=()=>(V&&Array.isArray(V.produtos)?V.produtos:[]);
 const sel=tipo=>prods().filter(p=>p.tipo===tipo&&Q[p.id]>0);
