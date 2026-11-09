@@ -1337,7 +1337,7 @@ function linhasItens(o){
  if(frenteDe(o)!=='estacao')return o.itens.map(simples).join('\n');
  const usados=new Set();const out=[];const conv=+o.convidados||0;
  o.itens.forEach((x,i)=>{const p=getProd(x.p)||{};if(p.adDe&&o.itens.some(y=>y.p===p.adDe))return;usados.add(i);
-  let l;if(p.cobranca==='pessoa')l=`• ${p.nome}: ${nq(x.q)} pessoas × ${brl(x.v)} = ${brl(x.q*x.v)}`;
+  let l;if(p.cobranca==='pessoa'&&x.q>1)l=`• ${p.nome}: ${nq(x.q)} pessoas × ${brl(x.v)} = ${brl(x.q*x.v)}`;
   else if(p.cobranca==='faixa')l=`• ${p.nome}${conv?` (${nq(conv)} convidados)`:''}${x.q>1?` × ${nq(x.q)}`:''}: ${brl(x.q*x.v)}`;
   else l=x.q===1?`• ${p.nome}: ${brl(x.v)}`:simples(x);
   out.push(l);
@@ -2164,7 +2164,7 @@ function gerarPDF(kind,id){
  const cabTab=()=>{fc(PC.goldSoft);doc.rect(M,y,R-M,8.5,'F');label('Item',M+4,y+5.6);label('Qtd',cQ,y+5.6,'right');label('Valor unit.',cU,y+5.6,'right');label('Total',cT,y+5.6,'right');y+=8.5};
  cabTab();
  const estD=frenteDe(o)==='estacao';
- o.itens.forEach((x,i)=>{const pp=getProd(x.p)||{};const nome=(estD&&pp.adDe?'+ ':'')+(pp.nome||'Item')+(estD&&pp.cobranca==='pessoa'?' (por pessoa)':'')+(estD&&pp.adDe?' (adicional)':'');font('normal',10,PC.ink);const ls=doc.splitTextToSize(nome,cQ-M-22);
+ o.itens.forEach((x,i)=>{const pp=getProd(x.p)||{};const nome=(estD&&pp.adDe?'+ ':'')+(pp.nome||'Item')+(estD&&pp.cobranca==='pessoa'&&x.q>1?' (por pessoa)':'')+(estD&&pp.adDe?' (adicional)':'');font('normal',10,PC.ink);const ls=doc.splitTextToSize(nome,cQ-M-22);
   const incT=estD&&!pp.adDe?String(pp.inclusos||'').split('\n').map(t=>t.trim()).filter(Boolean).join(', '):'';font('normal',8,PC.muted);const li=incT?doc.splitTextToSize('Inclui: '+incT+'.',cQ-M-22):[];
   const rh=Math.max(10,ls.length*4.6+5.2+li.length*3.6+(li.length?1:0));
   if(y+rh>FOOT-10){novaPagina();cabTab()}
