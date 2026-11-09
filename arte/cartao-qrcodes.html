@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Sweet Ka – QR codes</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{ --gold:#94733A; --gold-dark:#5E4520; --gold-soft:#E9DCC3; --cream:#FBF7F0; --paper:#FFFDF9; --ink:#3B2F24; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#ddd}
+  .card{
+    width:1200px;height:1600px;position:relative;overflow:hidden;
+    background:
+      radial-gradient(ellipse 900px 600px at 50% -10%, #fff 0%, transparent 70%),
+      radial-gradient(ellipse 700px 500px at 50% 110%, #F3E8D6 0%, transparent 70%),
+      var(--cream);
+    font-family:"Plus Jakarta Sans",sans-serif;color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;
+  }
+  .frame{position:absolute;inset:44px;border:2px solid var(--gold);border-radius:28px;pointer-events:none}
+  .frame::after{content:"";position:absolute;inset:12px;border:1px solid var(--gold-soft);border-radius:20px}
+  .logo{width:740px;margin-top:190px}
+  .tagline{margin-top:34px;font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:500;
+    font-size:46px;color:var(--gold);text-align:center;line-height:1.25}
+  .heart{display:inline-block;color:var(--gold);font-style:normal}
+  .qrs{display:flex;gap:56px;margin-top:110px}
+  .item{display:flex;flex-direction:column;align-items:center;width:450px}
+  .qrbox{width:450px;height:450px;background:var(--paper);border-radius:28px;padding:40px;
+    box-shadow:0 2px 4px rgba(94,69,32,.06),0 18px 40px rgba(94,69,32,.12);
+    border:1.5px solid var(--gold-soft);position:relative}
+  .qrbox img{width:100%;height:100%;display:block}
+  .badge{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:74px;height:74px;
+    background:var(--paper);border-radius:18px;display:grid;place-items:center;
+    box-shadow:0 0 0 8px var(--paper)}
+  .badge svg{width:52px;height:52px}
+  .label{margin-top:50px;font-family:"Cormorant Garamond",serif;font-weight:600;font-size:54px;color:var(--gold-dark);line-height:1}
+  .sub{margin-top:14px;font-size:22px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);font-weight:500}
+  .stars{margin-top:16px;color:var(--gold);font-size:30px;letter-spacing:8px}
+  .footer{position:absolute;bottom:130px;display:flex;align-items:center;gap:28px;
+    font-size:21px;letter-spacing:.42em;text-transform:uppercase;color:var(--gold);font-weight:500}
+  .footer::before,.footer::after{content:"";width:150px;height:1.5px;background:var(--gold);opacity:.7}
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="frame"></div>
+  <img class="logo" src="logo-sweetka.png" alt="Sweet Ka Confeitaria">
+  <p class="tagline">Ficou feliz com nosso carinho? <span class="heart">♡</span><br>Conta pra gente!</p>
+
+  <div class="qrs">
+    <div class="item">
+      <div class="qrbox">
+        <img src="qr-google.svg" alt="">
+        <div class="badge">
+          <svg viewBox="0 0 48 48"><path fill="#94733A" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.4-.4-3.5z"/></svg>
+        </div>
+      </div>
+      <div class="label">Avalie no Google</div>
+      <div class="stars">★★★★★</div>
+    </div>
+    <div class="item">
+      <div class="qrbox">
+        <img src="qr-instagram.svg" alt="">
+        <div class="badge">
+          <svg viewBox="0 0 48 48" fill="none" stroke="#94733A" stroke-width="4"><rect x="6" y="6" width="36" height="36" rx="10"/><circle cx="24" cy="24" r="8.5"/><circle cx="34.5" cy="13.5" r="1.8" fill="#94733A" stroke="none"/></svg>
+        </div>
+      </div>
+      <div class="label">Siga no Instagram</div>
+      <div class="sub">@confeitaria.sk</div>
+    </div>
+  </div>
+
+  <div class="footer">Aponte a câmera</div>
+</div>
+</body>
+</html>
