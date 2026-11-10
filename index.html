@@ -14,7 +14,8 @@
 <link rel="icon" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
 <meta name="apple-mobile-web-app-title" content="Confeitarias">
-<style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}.btn.wa{background:#25D366;border-color:#25D366;color:#fff}.btn.wa:hover{background:#1fb457}.btn.wa svg{stroke:#fff}
+</style>
 <title>Gestão Confeitarias</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -479,7 +480,7 @@ const IC={
  config:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
  mais:'<circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/>',
  plus:'<path d="M12 5v14M5 12h14"/>',
- copy:'<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>',
+ whats:'<path d="M20.5 11.5a8.5 8.5 0 0 1-12.6 7.4L3.5 20l1.2-4.2A8.5 8.5 0 1 1 20.5 11.5z"/><path d="M9 8.5c0 3.5 2.5 6.5 6.5 6.5l1-1.5-2-1-1 .8c-1-.4-2-1.4-2.5-2.5l.8-1-1-2z"/>',copy:'<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>',
  x:'<path d="M6 6l12 12M18 6L6 18"/>',
  edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
  pdf:'<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M12 11v6M9.5 14.5 12 17l2.5-2.5"/>',
@@ -1258,6 +1259,7 @@ function verPedido(id){
  const foot=`<button class="btn ghost danger sp" onclick="${p.status==='cancelado'?`excluirPedido('${p.id}')`:`cancelarPedido('${p.id}')`}">${p.status==='cancelado'?'Excluir':'Cancelar pedido'}</button>
   <button class="btn" onclick="copiarTexto(msgPedido('${p.id}'))">${ico('copy')}Copiar resumo</button>
   <button class="btn" onclick="gerarPDF('ped','${p.id}')">${ico('pdf')}PDF</button>
+  <button class="btn wa" onclick="gerarPDF('ped','${p.id}','wa')">${ico('whats')}Enviar no WhatsApp</button>
   <button class="btn" onclick="editarDoc('ped','${p.id}')">Editar</button>
   ${prox?`<button class="btn pri" onclick="mudarStatus('${p.id}','${prox[0]}')">${prox[1]}</button>`:''}`;
  openModal(`${est?'Estação Gourmet':'Encomenda'} #${p.num}`,body,foot,true);
@@ -1320,6 +1322,7 @@ function verOrc(id){
   ${aberto?`<button class="btn" onclick="setOrc('${o.id}','recusado')">Recusado</button>`:''}
   <button class="btn" onclick="copiarTexto(msgOrc(S.orcamentos.find(x=>x.id==='${o.id}')));${o.status==='aberto'?`setOrc('${o.id}','enviado',true)`:''}">${ico('copy')}Copiar mensagem</button>
   <button class="btn" onclick="gerarPDF('orc','${o.id}')">${ico('pdf')}PDF</button>
+  <button class="btn wa" onclick="gerarPDF('orc','${o.id}','wa')">${ico('whats')}Enviar no WhatsApp</button>
   <button class="btn" onclick="editarDoc('orc','${o.id}')">Editar</button>
   ${aberto?`<button class="btn pri" onclick="aprovarOrc('${o.id}')">Aprovado, gerar pedido</button>`:o.pedidoId?`<button class="btn pri" onclick="verPedido('${o.pedidoId}')">Ver pedido</button>`:''}`;
  openModal(`Orçamento #${o.num}`,body,foot,true);
@@ -2120,7 +2123,7 @@ function zipStore(arq,mime){const enc=new TextEncoder();const T=zipStore.t||(zip
 /* ============ PDF ============ */
 const PC={gold:[148,115,58],ink:[42,34,41],muted:[118,108,119],line:[226,221,231],goldSoft:[246,239,226],lilacSoft:[240,238,248],white:[255,255,255]};
 const semAcento=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Za-z0-9]+/g,'-').replace(/^-|-$/g,'');
-function gerarPDF(kind,id){
+function gerarPDF(kind,id,modo){
  const col=kind==='ped'?S.pedidos:S.orcamentos;const o=col.find(x=>x.id===id);if(!o)return toast('Documento não encontrado.','bad');
  if(!window.jspdf||!window.jspdf.jsPDF)return toast('O gerador de PDF não carregou. Verifique a internet e tente de novo.','bad');
  const c=CFG(),t=totaisDoc(o),cli=getCli(o.cliente)||{};const isOrc=kind==='orc';
@@ -2201,7 +2204,21 @@ function gerarPDF(kind,id){
   if(np>1)doc.text(`${i}/${np}`,R,FOOT+16.5,{align:'right'})}
  doc.setProperties({title:`${isOrc?'Orçamento':'Pedido'} ${o.num} ${c.empresa}`,author:c.empresa});
  const fn=`${isOrc?'Orcamento':'Pedido'}-${o.num}-${semAcento(cli.nome||'cliente')}.pdf`;
+ if(modo==='wa')return enviarWa(kind,o,cli,fn,doc.output('blob'));
  salvarArquivo(fn,doc.output('blob'));
+}
+async function enviarWa(kind,o,cli,fn,blob){
+ const txt=kind==='orc'?msgOrc(o):msgPedido(o.id);
+ const marca=()=>{if(kind==='orc'&&o.status==='aberto')setOrc(o.id,'enviado',true)};
+ try{await navigator.clipboard.writeText(txt)}catch(e){}
+ const f=new File([blob],fn,{type:'application/pdf'});
+ if(matchMedia('(pointer:coarse)').matches&&navigator.canShare&&navigator.canShare({files:[f]})){
+  try{await navigator.share({files:[f],text:txt,title:fn});marca();toast('Mensagem copiada também. Se o texto não aparecer no WhatsApp, é só colar na conversa.');return}
+  catch(e){if(e&&e.name==='AbortError')return}}
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);
+ const l=waLink(cli.fone,txt);
+ if(l){window.open(l,'_blank','noopener');marca();toast('PDF baixado e WhatsApp aberto com a mensagem. Arraste o PDF para a conversa.')}
+ else toast('PDF baixado e mensagem copiada. A cliente não tem WhatsApp cadastrado.','bad');
 }
 async function salvarArquivo(fn,blob){
  const img=/\.png$/i.test(fn),xl=/\.xlsx$/i.test(fn),N=img?'Imagem':'PDF',ok=xl?'Planilha salva.':img?'Imagem salva. Agora é só postar no Instagram.':'PDF salvo.';
