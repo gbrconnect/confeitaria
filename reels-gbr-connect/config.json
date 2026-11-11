@@ -7,29 +7,29 @@
   "pausa_entre_frases": 0.3,
   "cena_final_minimo": 3.2,
   "frases": [
-    "Sua empresa ainda vive no caderno?",
-    "Cliente esquecido, orçamento perdido...",
-    "Que tal um sistema só, do seu jeito?",
-    "Clientes, orçamentos e financeiro no computador.",
+    "Sua empresa vende, mas o dinheiro some?",
+    "Sem controle de caixa, estoque e contas a pagar.",
+    "Eu crio um sistema de gestão do seu jeito.",
+    "Lucro, estoque e vencimentos num painel só.",
     "Tenho só duas vagas. Me chama no direct!"
   ],
   "legendas": false,
   "descer_cenas_sem_legenda": 120,
   "legendas_palavras_por_bloco": [
     [
-      3,
+      4,
       3
     ],
     [
-      2,
-      2
+      4,
+      5
     ],
     [
       4,
-      4
+      5
     ],
     [
-      3,
+      4,
       3
     ],
     [
@@ -38,8 +38,8 @@
     ]
   ],
   "palavras_chave": [
-    "caderno",
-    "sistema só",
+    "dinheiro some",
+    "gestão",
     "duas vagas"
   ],
   "animacao": {

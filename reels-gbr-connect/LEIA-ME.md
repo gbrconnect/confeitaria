@@ -3,7 +3,7 @@
 ## Arquivos que você precisa colocar nesta pasta
 - `logo-gbr-connect.png`: logo com fundo transparente (vai no selo do canto). A versão atual foi gerada a partir da logo com fundo branco, removendo o branco.
 - `animacao-gbr.mp4`: animação da logo (1920x1080)
-- opcional: `print-1.png`, `print-2.png`, `print-3.png`: prints reais do sistema no computador (Clientes, Orçamentos, Financeiro), de preferência em 16:10 (ex.: 1440x900). Eles ocupam a tela inteira do notebook.
+- opcional: `print-1.png`, `print-2.png`, `print-3.png`: prints reais do sistema no computador (Painel, Estoque, Contas), de preferência em 16:10 (ex.: 1440x900). Eles ocupam a tela inteira do notebook.
 
 Se algum faltar, o script usa uma versão PROVISÓRIA e avisa no final.
 
