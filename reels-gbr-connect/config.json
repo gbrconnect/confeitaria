@@ -1,0 +1,40 @@
+{
+  "voz": "pt-BR-AntonioNeural",
+  "rate_inicial": 10,
+  "rate_maximo": 70,
+  "pitch": "+0Hz",
+  "duracao_maxima": 15.0,
+
+  "frases": [
+    "Sua empresa ainda vive no caderno?",
+    "Cliente esquecido, orçamento perdido, lucro que ninguém sabe.",
+    "E se tudo ficasse num sistema só, feito do jeito da sua empresa?",
+    "Clientes, orçamentos e financeiro, direto no celular.",
+    "Tenho só duas vagas. Me chama no direct!"
+  ],
+
+  "legendas_palavras_por_bloco": [
+    [3, 3],
+    [2, 2, 4],
+    [4, 3, 3, 3],
+    [2, 2, 3],
+    [4, 4]
+  ],
+  "palavras_chave": ["caderno", "sistema só", "duas vagas"],
+
+  "animacao": {
+    "arquivo": "animacao-gbr.mp4",
+    "inicio": 6.5,
+    "fim": 10.0,
+    "largura_na_tela": 900,
+    "centro_y": 590,
+    "logo_parada_minimo": 1.0,
+    "aceleracao_maxima": 1.25,
+    "recorte": "auto",
+    "margem_recorte": 60,
+    "esfumado": 70
+  },
+
+  "telas_celular": ["print-1.png", "print-2.png", "print-3.png"],
+  "logo": "logo-gbr-connect.png"
+}

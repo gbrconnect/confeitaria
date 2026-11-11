@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Logo provisória</title>
+<!-- Só é usado quando logo-gbr-connect.png / animacao-gbr.mp4 não existem na pasta. -->
+<style>
+  @font-face { font-family: Poppins; font-weight: 800; src: url(../fontes/Poppins-800.ttf); }
+  @font-face { font-family: Poppins; font-weight: 600; src: url(../fontes/Poppins-600.ttf); }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: transparent; font-family: Poppins; }
+  body.anim { background: #E6EBF3; }
+  #marca { position: absolute; left: 50%; top: 50%; display: flex; align-items: center; gap: .18em; transform: translate(-50%, -50%); font-size: 100px; }
+  #lamp { width: .95em; height: .95em; border-radius: 50%; border: .09em solid #0C2B58; background: transparent; position: relative; }
+  #lamp:after { content: ""; position: absolute; left: 30%; right: 30%; bottom: -.32em; height: .22em; background: #0C2B58; border-radius: .05em; }
+  #txt b { display: block; font-weight: 800; font-size: 1.15em; line-height: .95; color: #0C2B58; letter-spacing: -.02em; }
+  #txt span { display: block; font-weight: 600; font-size: .62em; line-height: 1.1; color: #259882; }
+</style>
+</head>
+<body>
+<div id="marca"><div id="lamp"></div><div id="txt"><b>GBR</b><span id="con">Connect</span></div></div>
+<script>
+let modo = 'logo';
+function montar(d) { modo = d.modo; document.body.className = modo; document.getElementById('marca').style.fontSize = (d.tamanho || 100) + 'px'; }
+function setTime(t) {
+  if (modo !== 'anim') { lamp.style.background = '#F1BE49'; return; }
+  const p = (a, b) => Math.min(1, Math.max(0, (t - a) / (b - a)));
+  const acende = p(7.0, 7.5);
+  lamp.style.background = `rgba(241,190,73,${acende})`;
+  lamp.style.boxShadow = `0 0 ${80 * acende * (1 - 0.6 * p(7.6, 8.6))}px rgba(241,190,73,${acende})`;
+  con.style.opacity = p(8.0, 8.7);
+  con.style.transform = `translateX(${(1 - p(8.0, 8.7)) * -40}px)`;
+  marca.style.opacity = p(0.5, 1.5);
+}
+</script>
+</body>
+</html>

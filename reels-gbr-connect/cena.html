@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Reels GBR Connect</title>
+<style>
+  @font-face { font-family: Poppins; font-weight: 500; src: url(fontes/Poppins-500.ttf); }
+  @font-face { font-family: Poppins; font-weight: 600; src: url(fontes/Poppins-600.ttf); }
+  @font-face { font-family: Poppins; font-weight: 700; src: url(fontes/Poppins-700.ttf); }
+  @font-face { font-family: Poppins; font-weight: 800; src: url(fontes/Poppins-800.ttf); }
+
+  :root {
+    --fundo: #071939;
+    --marinho: #0C2B58;
+    --menta: #58CFB6;
+    --assinatura: #259882;
+    --lampada: #F1BE49;
+    --cinza: #E8EDF5;
+    --branco: #FFFFFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--fundo); }
+  body { font-family: Poppins, "Noto Color Emoji", sans-serif; color: var(--branco); position: relative; }
+  .camada { position: absolute; inset: 0; }
+  .cena { position: absolute; inset: 0; opacity: 0; }
+  .menta { color: var(--menta); }
+
+  /* ---------- Selo da logo ---------- */
+  #selo {
+    position: absolute; top: 200px; right: 50px; z-index: 50;
+    background: var(--cinza); border-radius: 24px; padding: 16px 18px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, .35);
+    transform-origin: 80% 20%;
+  }
+  #selo img { display: block; width: 220px; height: auto; }
+
+  /* ---------- Cena 1 ---------- */
+  #c1 .titulo {
+    position: absolute; left: 80px; right: 80px; top: 720px;
+    font-weight: 800; font-size: 118px; line-height: 1.08; letter-spacing: -2px; text-align: center;
+  }
+  #c1 .titulo span.k { display: inline-block; color: var(--menta); }
+  #caderno { position: absolute; left: 50%; top: 380px; width: 260px; height: 300px; margin-left: -130px; }
+
+  /* ---------- Cena 2 ---------- */
+  #c2 .linha {
+    position: absolute; left: 70px; right: 40px; height: 170px;
+    display: flex; align-items: center; gap: 30px;
+    font-weight: 800; font-size: 78px; letter-spacing: -1.5px; white-space: nowrap;
+  }
+  #c2 .icone {
+    flex: none; width: 124px; height: 124px; border-radius: 34px;
+    background: var(--marinho); border: 4px solid var(--menta);
+    display: flex; align-items: center; justify-content: center;
+  }
+  #c2 .linha.lucro .icone { border-color: var(--lampada); }
+  #c2 .linha.lucro .txt { color: var(--lampada); }
+
+  /* ---------- Cena 3 ---------- */
+  #c3 .titulo { position: absolute; left: 60px; right: 60px; top: 420px; text-align: center; }
+  #c3 .t1 { font-weight: 800; font-size: 112px; line-height: 1.05; letter-spacing: -2px; color: var(--menta); }
+  #c3 .t2 { font-weight: 700; font-size: 66px; line-height: 1.15; margin-top: 10px; }
+  #grade { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
+  .card {
+    position: absolute; width: 230px; height: 150px; border-radius: 26px;
+    background: rgba(88, 207, 182, .14); border: 4px solid var(--menta);
+    padding: 22px 20px; display: flex; gap: 16px; align-items: flex-start;
+  }
+  .card .bola { flex: none; width: 46px; height: 46px; border-radius: 50%; background: var(--menta); }
+  .card .linhas { flex: 1; display: flex; flex-direction: column; gap: 14px; padding-top: 4px; }
+  .card .linhas i { display: block; height: 14px; border-radius: 7px; background: var(--menta); opacity: .75; }
+  .card .linhas i:nth-child(2) { width: 70%; opacity: .45; }
+  .card .linhas i:nth-child(3) { width: 45%; opacity: .35; }
+  #moldura3 {
+    position: absolute; border: 5px solid var(--menta); border-radius: 44px;
+    box-shadow: 0 0 60px rgba(88, 207, 182, .35);
+  }
+
+  /* ---------- Cena 4 ---------- */
+  #celular {
+    position: absolute; left: 50%; top: 330px; width: 510px; height: 1030px; margin-left: -255px;
+    border-radius: 78px; background: var(--marinho); padding: 20px;
+    box-shadow: 0 0 0 4px var(--menta), 0 40px 90px rgba(0, 0, 0, .55);
+  }
+  #celular .tela { position: relative; width: 100%; height: 100%; border-radius: 60px; overflow: hidden; background: var(--cinza); }
+  #celular .notch { position: absolute; top: 34px; left: 50%; width: 150px; height: 38px; margin-left: -75px; border-radius: 20px; background: var(--fundo); z-index: 5; }
+  .app { position: absolute; inset: 0; color: var(--marinho); background: var(--cinza); }
+  .app img.print { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .app .topo { background: var(--marinho); color: var(--branco); padding: 100px 34px 34px; }
+  .app .topo small { display: block; font-weight: 500; font-size: 22px; color: var(--menta); }
+  .app .topo b { display: block; font-weight: 800; font-size: 50px; letter-spacing: -1px; }
+  .app .busca { margin: 24px 26px 8px; height: 58px; border-radius: 29px; background: var(--branco); padding: 0 24px; display: flex; align-items: center; font-size: 22px; font-weight: 500; color: var(--marinho); opacity: .6; }
+  .app .item { margin: 14px 26px; background: var(--branco); border-radius: 24px; padding: 18px 20px; display: flex; align-items: center; gap: 16px; }
+  .app .av { flex: none; width: 58px; height: 58px; border-radius: 50%; background: var(--menta); color: var(--marinho); font-weight: 800; font-size: 24px; display: flex; align-items: center; justify-content: center; }
+  .app .nome { flex: 1; font-weight: 700; font-size: 24px; line-height: 1.2; }
+  .app .nome small { display: block; font-weight: 500; font-size: 18px; opacity: .6; }
+  .app .chip { flex: none; font-weight: 700; font-size: 17px; padding: 6px 14px; border-radius: 14px; }
+  .chip.ok { background: var(--menta); color: var(--marinho); }
+  .chip.pend { background: var(--lampada); color: var(--marinho); }
+  .chip.novo { background: var(--marinho); color: var(--branco); }
+  .app .valor { font-weight: 800; font-size: 26px; }
+  .app .saldo { margin: 24px 26px; background: var(--marinho); color: var(--branco); border-radius: 30px; padding: 28px; }
+  .app .saldo small { font-weight: 500; font-size: 20px; color: var(--menta); }
+  .app .saldo b { display: block; font-weight: 800; font-size: 52px; letter-spacing: -1px; }
+  .app .barras { display: flex; align-items: flex-end; gap: 14px; height: 140px; margin-top: 18px; }
+  .app .barras i { flex: 1; border-radius: 10px 10px 4px 4px; background: var(--menta); }
+  .app .barras i.c { background: var(--assinatura); }
+  .app .abas { position: absolute; left: 0; right: 0; bottom: 0; height: 104px; background: var(--branco); display: flex; justify-content: space-around; align-items: center; padding-bottom: 14px; }
+  .app .abas i { width: 64px; height: 12px; border-radius: 6px; background: var(--marinho); opacity: .2; }
+  .app .abas i.on { background: var(--assinatura); opacity: 1; }
+
+  /* ---------- Cena 5 ---------- */
+  #c5 { opacity: 1; }
+  #c5 .claro { position: absolute; inset: 0; background: var(--cinza); }
+  #c5 .vagas {
+    position: absolute; left: 0; right: 0; top: 990px; text-align: center;
+    font-weight: 800; font-size: 132px; letter-spacing: -3px; color: var(--marinho);
+  }
+  #botao {
+    position: absolute; left: 50%; top: 1175px; transform-origin: 50% 50%;
+    background: var(--lampada); color: var(--marinho); border-radius: 999px;
+    padding: 34px 64px; font-weight: 800; font-size: 58px; white-space: nowrap; letter-spacing: -1px;
+    box-shadow: 0 16px 40px rgba(12, 43, 88, .28);
+  }
+  #c5 .comenta {
+    position: absolute; left: 0; right: 0; top: 1345px; text-align: center;
+    font-weight: 600; font-size: 44px; color: var(--marinho);
+  }
+  #c5 .comenta b { font-weight: 800; color: var(--assinatura); }
+
+  /* ---------- Legendas ---------- */
+  #legenda {
+    position: absolute; left: 60px; right: 60px; top: 1470px; height: 200px; z-index: 40;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+  }
+  #legenda .bloco {
+    font-weight: 800; font-size: 80px; line-height: 1.08; letter-spacing: -1px; color: var(--branco);
+    -webkit-text-stroke: 14px var(--fundo); paint-order: stroke fill;
+  }
+  #legenda .bloco .k { color: var(--menta); }
+  #legenda.claro .bloco { color: var(--marinho); -webkit-text-stroke: 14px var(--cinza); }
+  #legenda.claro .bloco .k { color: var(--assinatura); }
+</style>
+</head>
+<body>
+  <!-- Cena 1: caderno -->
+  <div class="cena" id="c1">
+    <svg id="caderno" viewBox="0 0 260 300">
+      <rect x="30" y="20" width="210" height="270" rx="18" fill="#0C2B58" stroke="#FFFFFF" stroke-width="6"/>
+      <rect x="30" y="20" width="44" height="270" rx="10" fill="#58CFB6"/>
+      <g stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity=".85">
+        <line x1="100" y1="80" x2="210" y2="80"/><line x1="100" y1="125" x2="200" y2="125"/>
+        <line x1="100" y1="170" x2="215" y2="170"/><line x1="100" y1="215" x2="170" y2="215"/>
+      </g>
+      <g fill="#071939" stroke="#FFFFFF" stroke-width="5">
+        <circle cx="30" cy="60" r="13"/><circle cx="30" cy="120" r="13"/><circle cx="30" cy="180" r="13"/><circle cx="30" cy="240" r="13"/>
+      </g>
+      <text x="196" y="255" font-family="Poppins" font-weight="800" font-size="90" fill="#F1BE49">?</text>
+    </svg>
+    <div class="titulo">Sua empresa ainda vive no <span class="k" id="kcaderno">caderno?</span></div>
+  </div>
+
+  <!-- Cena 2: dores -->
+  <div class="cena" id="c2">
+    <div class="linha" id="l1" style="top:520px">
+      <div class="icone"><svg width="78" height="78" viewBox="0 0 78 78"><circle cx="39" cy="26" r="15" fill="none" stroke="#58CFB6" stroke-width="7"/><path d="M12 72c3-17 14-25 27-25s24 8 27 25" fill="none" stroke="#58CFB6" stroke-width="7" stroke-linecap="round"/></svg></div>
+      <div class="txt">Cliente esquecido</div>
+    </div>
+    <div class="linha" id="l2" style="top:760px">
+      <div class="icone"><svg width="78" height="78" viewBox="0 0 78 78"><rect x="14" y="6" width="50" height="66" rx="8" fill="none" stroke="#58CFB6" stroke-width="7"/><path d="M28 30l22 22M50 30L28 52" stroke="#58CFB6" stroke-width="7" stroke-linecap="round"/></svg></div>
+      <div class="txt">Orçamento perdido</div>
+    </div>
+    <div class="linha lucro" id="l3" style="top:1000px">
+      <div class="icone"><svg width="78" height="78" viewBox="0 0 78 78"><text x="39" y="60" text-anchor="middle" font-family="Poppins" font-weight="800" font-size="58" fill="#F1BE49">R$</text></svg></div>
+      <div class="txt">Lucro?</div>
+    </div>
+  </div>
+
+  <!-- Cena 3: um sistema só -->
+  <div class="cena" id="c3">
+    <div class="titulo">
+      <div class="t1">Um sistema só,</div>
+      <div class="t2">do jeito da sua empresa</div>
+    </div>
+    <div id="moldura3"></div>
+    <div id="grade"></div>
+  </div>
+
+  <!-- Cena 4: celular -->
+  <div class="cena" id="c4">
+    <div id="celular"><div class="tela" id="tela"><div class="notch"></div></div></div>
+  </div>
+
+  <!-- Cena 5: chamada final -->
+  <div class="cena" id="c5">
+    <div class="claro" id="claro"></div>
+    <div class="vagas" id="vagas">Só 2 vagas</div>
+    <div id="botao">Me chama no direct 📩</div>
+    <div class="comenta" id="comenta">ou comenta <b>EU QUERO</b></div>
+  </div>
+
+  <div id="selo"><img id="logo" alt=""></div>
+  <div id="legenda"><div class="bloco" id="bloco"></div></div>
+
+<script>
+// ---------------- utilidades ----------------
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const eOut = x => 1 - Math.pow(1 - x, 3);
+const eInOut = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const eBack = x => { const c = 1.9; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const $ = id => document.getElementById(id);
+const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+
+let D, CENAS, BLOCOS, FIM, P;   // dados vindos do render.js
+
+// Monta legendas, telas e cartões a partir dos dados
+function montar(dados) {
+  D = dados;
+  CENAS = D.tempos.inicio_cenas;      // início de cada frase = troca de cena
+  FIM = D.duracao;
+  P = D.tempos.palavras;
+  $('logo').src = D.logo;
+
+  // Blocos de legenda
+  BLOCOS = [];
+  D.cfg.frases.forEach((frase, fi) => {
+    const ws = P.filter(p => p.frase === fi);
+    let k = 0;
+    D.cfg.legendas_palavras_por_bloco[fi].forEach(n => {
+      const parte = ws.slice(k, k + n); k += n;
+      if (parte.length) BLOCOS.push({ inicio: fi === 0 && BLOCOS.length === 0 ? 0 : parte[0].inicio, texto: parte.map(p => p.texto).join(' '), claro: fi === 4 });
+    });
+  });
+  BLOCOS.forEach(b => {
+    let h = esc(b.texto);
+    D.cfg.palavras_chave.forEach(kw => {
+      h = h.replace(new RegExp('(' + kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[?!.,]*)', 'i'), '<span class="k">$1</span>');
+    });
+    b.html = h;
+  });
+
+  // Cartões bagunçados da cena 3
+  const g = $('grade');
+  for (let i = 0; i < 9; i++) {
+    const c = document.createElement('div');
+    c.className = 'card';
+    c.innerHTML = '<div class="bola"></div><div class="linhas"><i></i><i></i><i></i></div>';
+    g.appendChild(c);
+  }
+
+  // Telas do celular
+  const nomes = ['Clientes', 'Orçamentos', 'Financeiro'];
+  nomes.forEach((nome, i) => {
+    const a = document.createElement('div');
+    a.className = 'app'; a.id = 'app' + i;
+    a.innerHTML = D.prints[i] ? `<img class="print" src="${D.prints[i]}">` : telaFicticia(i, nome);
+    $('tela').appendChild(a);
+  });
+}
+
+function telaFicticia(i, nome) {
+  const abas = [0, 1, 2].map(k => `<i class="${k === i ? 'on' : ''}"></i>`).join('');
+  if (i === 0) {
+    const cl = [['MS', 'Maria Souza', 'Última compra há 2 dias', 'ok', 'Ativa'], ['JP', 'João Pereira', 'Retornar hoje', 'pend', 'Retorno'],
+                ['AL', 'Ana Lima', 'Cliente desde 2023', 'ok', 'Ativa'], ['RC', 'Rafael Costa', 'Pediu orçamento', 'novo', 'Novo'],
+                ['BF', 'Bia Fernandes', 'Aniversário amanhã', 'pend', 'Lembrar']];
+    return `<div class="topo"><small>GBR Connect</small><b>${nome}</b></div><div class="busca">Buscar cliente...</div>` +
+      cl.map(c => `<div class="item"><div class="av">${c[0]}</div><div class="nome">${c[1]}<small>${c[2]}</small></div><span class="chip ${c[3]}">${c[4]}</span></div>`).join('') +
+      `<div class="abas">${abas}</div>`;
+  }
+  if (i === 1) {
+    const or = [['#0142', 'Maria Souza', 'R$ 1.250,00', 'ok', 'Aprovado'], ['#0143', 'Rafael Costa', 'R$ 3.480,00', 'pend', 'Pendente'],
+                ['#0144', 'João Pereira', 'R$ 890,00', 'novo', 'Enviado'], ['#0145', 'Ana Lima', 'R$ 2.100,00', 'ok', 'Aprovado'],
+                ['#0146', 'Bia Fernandes', 'R$ 640,00', 'pend', 'Pendente']];
+    return `<div class="topo"><small>GBR Connect</small><b>${nome}</b></div><div class="busca">+ Novo orçamento</div>` +
+      or.map(o => `<div class="item"><div class="nome">${o[1]}<small>${o[0]}</small></div><div style="text-align:right"><div class="valor">${o[2]}</div><span class="chip ${o[3]}">${o[4]}</span></div></div>`).join('') +
+      `<div class="abas">${abas}</div>`;
+  }
+  const alt = [45, 62, 38, 70, 55, 82, 96];
+  return `<div class="topo"><small>GBR Connect</small><b>${nome}</b></div>` +
+    `<div class="saldo"><small>Lucro do mês</small><b>R$ 8.430,00</b><div class="barras">${alt.map((h, k) => `<i class="${k === 6 ? 'c' : ''}" style="height:${h}%"></i>`).join('')}</div></div>` +
+    `<div class="item"><div class="av">+</div><div class="nome">Recebido<small>Pedido #0142</small></div><div class="valor">R$ 1.250</div></div>` +
+    `<div class="item"><div class="av" style="background:#F1BE49">-</div><div class="nome">Fornecedor<small>Vence sexta</small></div><div class="valor">R$ 420</div></div>` +
+    `<div class="abas">${abas}</div>`;
+}
+
+// tempo da k-ésima palavra da frase fi
+const tp = (fi, k) => { const ws = P.filter(p => p.frase === fi); return ws[Math.min(k, ws.length - 1)].inicio; };
+
+// opacidade de uma cena: entra rápido no início da frase, sai rápido no início da próxima
+function visCena(t, i) {
+  const ini = CENAS[i], fim = i + 1 < CENAS.length ? CENAS[i + 1] : 1e9;
+  const entra = i === 0 ? 1 : prog(t, ini, ini + 0.14);
+  const sai = 1 - prog(t, fim, fim + 0.12);
+  return Math.min(entra, sai);
+}
+
+// ---------------- quadro a quadro ----------------
+function setTime(t) {
+  const [T1, T2, T3, T4, T5] = CENAS;
+
+  // ----- selo -----
+  const selo = $('selo');
+  const pop = eBack(prog(t, 0.15, 0.55));
+  const saiSelo = 1 - prog(t, T5, T5 + 0.18);
+  selo.style.opacity = Math.min(prog(t, 0.15, 0.25), saiSelo);
+  selo.style.transform = `scale(${0.4 + 0.6 * pop - 0.3 * (1 - saiSelo)})`;
+
+  // ----- cena 1 -----
+  const c1 = $('c1'); const v1 = visCena(t, 0);
+  c1.style.opacity = v1;
+  const sx = Math.sin(t * 57) * 3.2 + Math.sin(t * 23) * 2.2, sy = Math.cos(t * 49) * 2.4, sr = Math.sin(t * 31) * 0.7;
+  c1.querySelector('.titulo').style.transform = `translate(${sx}px,${sy}px) rotate(${sr}deg) translateY(${-60 * prog(t, T2, T2 + 0.12)}px)`;
+  const kc = prog(t, tp(0, 5) - 0.02, tp(0, 5) + 0.3);
+  $('kcaderno').style.transform = `scale(${1 + 0.14 * Math.sin(Math.PI * kc)})`;
+  $('caderno').style.transform = `rotate(${-8 + Math.sin(t * 9) * 4}deg) translateY(${Math.sin(t * 7) * 8}px)`;
+
+  // ----- cena 2 -----
+  const c2 = $('c2'); c2.style.opacity = visCena(t, 1);
+  [['l1', 0], ['l2', 2], ['l3', 4]].forEach(([id, k], n, arr) => {
+    const t0 = tp(1, k) - 0.06;
+    const e = prog(t, t0, t0 + 0.2);
+    const x = (1 - eBack(e)) * 900;
+    const prox = n + 1 < arr.length ? tp(1, arr[n + 1][1]) - 0.06 : 1e9;
+    const apaga = n < 2 ? 1 - 0.45 * prog(t, prox, prox + 0.2) : 1;
+    const el = $(id);
+    el.style.transform = `translateX(${x}px)`;
+    el.style.opacity = Math.min(prog(t, t0, t0 + 0.06), 1) * apaga;
+  });
+
+  // ----- cena 3 -----
+  const c3 = $('c3'); c3.style.opacity = visCena(t, 2);
+  const tit3 = eOut(prog(t, T3, T3 + 0.25));
+  c3.querySelector('.titulo').style.transform = `translateY(${(1 - tit3) * 50}px)`;
+  const alinhaIni = tp(2, 5) - 0.1, alinhaFim = alinhaIni + 0.7;   // "sistema" alinha tudo
+  const a = eInOut(prog(t, alinhaIni, alinhaFim));
+  const cards = $('grade').children;
+  const W = 230, H = 150, G = 28, gx = (1080 - (3 * W + 2 * G)) / 2, gy = 800;
+  for (let i = 0; i < cards.length; i++) {
+    const r = Math.sin(i * 91.7) * 0.5 + 0.5, s = Math.cos(i * 37.3) * 0.5 + 0.5;
+    const bx = 40 + r * (1080 - W - 80), by = 700 + s * 640;
+    const brot = (Math.sin(i * 13.1) * 38);
+    const jit = (1 - a);
+    const fx = gx + (i % 3) * (W + G), fy = gy + Math.floor(i / 3) * (H + G);
+    const x = bx + (fx - bx) * a + Math.sin(t * 6 + i) * 10 * jit;
+    const y = by + (fy - by) * a + Math.cos(t * 5 + i * 2) * 10 * jit;
+    const rot = brot * (1 - a) + Math.sin(t * 4 + i) * 4 * jit;
+    const ent = eBack(prog(t, T3 + i * 0.03, T3 + 0.25 + i * 0.03));
+    cards[i].style.transform = `translate(${x}px,${y}px) rotate(${rot}deg) scale(${ent})`;
+  }
+  const m = $('moldura3'); const mo = eOut(prog(t, alinhaFim - 0.05, alinhaFim + 0.3));
+  const pad = 30 + 40 * (1 - mo);
+  m.style.left = gx - pad + 'px'; m.style.top = gy - pad + 'px';
+  m.style.width = 3 * W + 2 * G + 2 * pad + 'px'; m.style.height = 3 * H + 2 * G + 2 * pad + 'px';
+  m.style.opacity = mo;
+
+  // ----- cena 4 -----
+  const c4 = $('c4'); c4.style.opacity = visCena(t, 3);
+  const ent4 = eBack(prog(t, T4, T4 + 0.3));
+  $('celular').style.transform = `translateY(${(1 - ent4) * 500 + Math.sin(t * 2.4) * 10}px) rotate(${Math.sin(t * 1.7) * 1.5}deg)`;
+  const trocas = [T4 - 1, tp(3, 1) - 0.08, tp(3, 3) - 0.08];   // Clientes, orçamentos, financeiro
+  for (let i = 0; i < 3; i++) {
+    const entra = i === 0 ? 1 : eOut(prog(t, trocas[i], trocas[i] + 0.22));
+    const sai = i < 2 ? eOut(prog(t, trocas[i + 1], trocas[i + 1] + 0.22)) : 0;
+    const el = $('app' + i);
+    el.style.transform = `translateX(${(1 - entra) * 100 - sai * 30}%)`;
+    el.style.zIndex = i;
+    el.style.filter = `brightness(${1 - sai * 0.4})`;
+  }
+
+  // ----- cena 5 -----
+  const c5 = $('c5');
+  const w = eOut(prog(t, T5, T5 + 0.28));
+  $('claro').style.clipPath = `circle(${w * 1150}px at 540px 960px)`;
+  c5.style.visibility = t >= T5 ? 'visible' : 'hidden';
+  const e1 = eBack(prog(t, T5 + 0.12, T5 + 0.4));
+  $('vagas').style.transform = `scale(${e1})`; $('vagas').style.opacity = prog(t, T5 + 0.12, T5 + 0.2);
+  const e2 = eBack(prog(t, T5 + 0.3, T5 + 0.6));
+  const pulso = 1 + 0.055 * Math.max(0, Math.sin((t - T5) * Math.PI * 2 / 0.85));
+  $('botao').style.transform = `translateX(-50%) scale(${e2 * pulso})`;
+  $('botao').style.opacity = prog(t, T5 + 0.3, T5 + 0.38);
+  $('comenta').style.opacity = prog(t, T5 + 0.5, T5 + 0.7);
+  $('comenta').style.transform = `translateY(${(1 - eOut(prog(t, T5 + 0.5, T5 + 0.75))) * 30}px)`;
+
+  // ----- legenda -----
+  let b = null;
+  for (const x of BLOCOS) if (t >= x.inicio - 0.001) b = x;
+  const bl = $('bloco');
+  if (b) {
+    if (bl.dataset.txt !== b.texto) { bl.innerHTML = b.html; bl.dataset.txt = b.texto; }
+    const pb = eBack(prog(t, b.inicio, b.inicio + 0.12));
+    bl.style.transform = `scale(${0.82 + 0.18 * pb})`;
+    $('legenda').className = b.claro && t >= T5 + 0.05 ? 'claro' : '';
+  }
+}
+</script>
+</body>
+</html>
