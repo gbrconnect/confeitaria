@@ -20,228 +20,218 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--fundo); }
-  body { font-family: Poppins, "Noto Color Emoji", sans-serif; color: var(--branco); position: relative; }
-  .camada { position: absolute; inset: 0; }
+  body { font-family: Poppins, sans-serif; color: var(--branco); position: relative; -webkit-font-smoothing: antialiased; }
+
+  /* ---------- Fundo: grade discreta + brilho marinho ---------- */
+  #fundo { position: absolute; inset: 0; overflow: hidden; }
+  #fundo .grade {
+    position: absolute; left: 0; right: 0; top: 0; height: 2100px;
+    background-image:
+      linear-gradient(rgba(88, 207, 182, .045) 1.5px, transparent 1.5px),
+      linear-gradient(90deg, rgba(88, 207, 182, .045) 1.5px, transparent 1.5px);
+    background-size: 90px 90px;
+  }
+  #fundo .brilho { position: absolute; left: 0; top: 0; width: 1400px; height: 1400px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(12, 43, 88, .95) 0%, rgba(12, 43, 88, 0) 65%); }
+
   .cena { position: absolute; inset: 0; opacity: 0; }
-  .menta { color: var(--menta); }
+
+  /* Tipografia */
+  .rotulo { position: absolute; left: 96px; display: flex; align-items: center; gap: 18px;
+    font-weight: 600; font-size: 24px; letter-spacing: 6px; text-transform: uppercase; color: var(--menta); }
+  .rotulo:before { content: ""; width: 56px; height: 3px; background: var(--menta); }
+  .titulo { position: absolute; left: 96px; right: 80px; font-weight: 700; letter-spacing: -2.5px; line-height: 1.06; }
+  .titulo .k { color: var(--menta); }
+  .mask { display: block; overflow: hidden; padding-bottom: .06em; margin-bottom: -.06em; }
+  .mask > span { display: block; }
 
   /* ---------- Selo da logo ---------- */
   #selo {
     position: absolute; top: 200px; right: 50px; z-index: 50;
     background: var(--cinza); border-radius: 24px; padding: 16px 18px;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, .35);
-    transform-origin: 80% 20%;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, .35);
+    transform-origin: 100% 0;
   }
   #selo img { display: block; width: 220px; height: auto; }
 
   /* ---------- Cena 1 ---------- */
-  #c1 .titulo {
-    position: absolute; left: 60px; right: 60px; top: 760px;
-    font-weight: 800; font-size: 108px; line-height: 1.08; letter-spacing: -2px; text-align: center;
-  }
-  #c1 .titulo span.k { display: inline-block; color: var(--menta); }
-  #carteira { position: absolute; left: 50%; top: 360px; width: 420px; height: 360px; margin-left: -210px; }
-  #carteira svg.cart { position: absolute; left: 90px; bottom: 0; width: 240px; height: 180px; }
-  .moeda {
-    position: absolute; left: 0; top: 0; width: 92px; height: 92px; border-radius: 50%;
-    background: var(--lampada); border: 6px solid #FFFFFF; color: var(--marinho);
-    display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 32px; letter-spacing: -1px;
-  }
+  #c1 .rotulo { top: 440px; }
+  #c1 .titulo { top: 500px; font-size: 96px; }
+  #grafico1 { position: absolute; left: 96px; top: 930px; width: 888px; height: 440px; overflow: visible; }
+  #grafico1 .eixo { stroke: rgba(255, 255, 255, .14); stroke-width: 2; }
+  #grafico1 text { font-family: Poppins; font-weight: 600; font-size: 26px; }
 
   /* ---------- Cena 2 ---------- */
-  #c2 .linha {
-    position: absolute; left: 70px; right: 40px; height: 170px;
-    display: flex; align-items: center; gap: 30px;
-    font-weight: 800; font-size: 78px; letter-spacing: -1.5px; white-space: nowrap;
-  }
-  #c2 .icone {
-    flex: none; width: 124px; height: 124px; border-radius: 34px;
-    background: var(--marinho); border: 4px solid var(--menta);
-    display: flex; align-items: center; justify-content: center;
-  }
-  #c2 .linha.alerta .icone { border-color: var(--lampada); }
-  #c2 .linha.alerta .txt { color: var(--lampada); }
+  #c2 .rotulo { top: 440px; }
+  .item2 { position: absolute; left: 96px; right: 96px; height: 200px; }
+  .item2 .num { position: absolute; left: 0; top: 34px; font-weight: 600; font-size: 26px; letter-spacing: 2px; color: var(--menta); }
+  .item2 .txt { position: absolute; left: 0; top: 72px; font-weight: 700; font-size: 74px; letter-spacing: -2px; line-height: 1.05; white-space: nowrap; }
+  .item2 .txt .y { color: var(--lampada); }
+  .item2 .linha { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: rgba(255, 255, 255, .16); transform-origin: 0 50%; }
 
   /* ---------- Cena 3 ---------- */
-  #c3 .titulo { position: absolute; left: 60px; right: 60px; top: 340px; text-align: center; }
-  #c3 .t1 { font-weight: 800; font-size: 112px; line-height: 1.05; letter-spacing: -2px; color: var(--menta); }
-  #c3 .t2 { font-weight: 700; font-size: 66px; line-height: 1.15; margin-top: 10px; }
-  #grade { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; }
-  .card {
-    position: absolute; width: 230px; height: 150px; border-radius: 26px;
-    background: rgba(88, 207, 182, .14); border: 4px solid var(--menta);
-    padding: 18px 20px; display: flex; flex-direction: column; justify-content: space-between;
+  #c3 .rotulo { top: 400px; }
+  #c3 .titulo { top: 456px; font-size: 84px; }
+  .kpi3 {
+    position: absolute; left: 0; top: 0; width: 432px; height: 176px; border-radius: 22px;
+    background: var(--marinho); border: 2px solid rgba(88, 207, 182, .22);
+    padding: 26px 28px; box-shadow: 0 24px 50px rgba(0, 0, 0, .25);
   }
-  .card small { font-weight: 600; font-size: 21px; color: var(--menta); line-height: 1; }
-  .card b { font-weight: 800; font-size: 34px; letter-spacing: -1px; line-height: 1; color: #FFFFFF; }
-  .card i { display: block; height: 10px; border-radius: 5px; background: var(--menta); opacity: .55; }
-  #moldura3 {
-    position: absolute; border: 5px solid var(--menta); border-radius: 44px;
-    box-shadow: 0 0 60px rgba(88, 207, 182, .35);
-  }
+  .kpi3 small { display: block; font-weight: 600; font-size: 19px; letter-spacing: 2.5px; text-transform: uppercase; color: rgba(255, 255, 255, .6); }
+  .kpi3 b { display: block; margin-top: 14px; font-weight: 700; font-size: 50px; letter-spacing: -1.5px; line-height: 1; }
+  .kpi3 .var { position: absolute; right: 26px; top: 24px; font-weight: 600; font-size: 18px; color: var(--menta); }
+  .kpi3 .var.neg { color: var(--lampada); }
+  .kpi3 svg { position: absolute; right: 26px; bottom: 26px; width: 130px; height: 44px; overflow: visible; }
 
-  /* ---------- Cena 4: computador ---------- */
-  #pc { position: absolute; left: 50%; top: 580px; width: 940px; margin-left: -470px; transform-origin: 50% 100%; }
-  #pc .monitor {
-    position: relative; width: 940px; height: 592px; border-radius: 30px; background: var(--marinho); padding: 22px 22px 22px;
-    box-shadow: 0 0 0 4px var(--menta), 0 40px 90px rgba(0, 0, 0, .55);
-  }
-  #pc .cam { position: absolute; top: 8px; left: 50%; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: var(--fundo); }
-  #pc .base { width: 1000px; height: 30px; margin: 0 -30px; border-radius: 4px 4px 26px 26px; background: var(--marinho); box-shadow: inset 0 4px 0 var(--menta); position: relative; }
-  #pc .base:after { content: ""; position: absolute; top: 4px; left: 50%; width: 160px; height: 10px; margin-left: -80px; border-radius: 0 0 10px 10px; background: var(--fundo); opacity: .6; }
-  #tela { position: relative; width: 896px; height: 548px; border-radius: 12px; overflow: hidden; background: var(--cinza); color: var(--marinho); }
-  .lado { position: absolute; left: 0; top: 0; bottom: 0; width: 200px; background: var(--marinho); padding: 24px 14px; color: var(--branco); }
-  .lado .marca { font-weight: 800; font-size: 26px; line-height: 1; padding: 0 10px 26px; }
-  .lado .marca span { display: block; font-weight: 600; font-size: 17px; color: var(--menta); }
+  /* ---------- Cena 4: janela do sistema ---------- */
+  #c4 .rotulo { top: 420px; }
+  #janela { position: absolute; left: 40px; top: 490px; width: 1000px; border-radius: 18px; overflow: hidden;
+    background: var(--marinho); box-shadow: 0 40px 100px rgba(0, 0, 0, .6), 0 0 0 2px rgba(88, 207, 182, .25); transform-origin: 50% 0; }
+  #janela .barra { height: 46px; display: flex; align-items: center; gap: 10px; padding: 0 20px; background: #0A2349; }
+  #janela .barra i { width: 13px; height: 13px; border-radius: 50%; background: rgba(232, 237, 245, .25); }
+  #janela .barra span { margin-left: 18px; font-weight: 500; font-size: 17px; color: rgba(232, 237, 245, .55); }
+  #tela { position: relative; width: 1000px; height: 600px; background: var(--cinza); color: var(--marinho); overflow: hidden; }
+  #modulos { position: absolute; left: 96px; right: 96px; top: 1215px; display: flex; gap: 46px; font-weight: 600; font-size: 34px; color: rgba(255, 255, 255, .35); }
+  #modulos span { position: relative; padding-bottom: 14px; }
+  #modulos span i { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; border-radius: 2px; background: var(--menta); transform-origin: 0 50%; }
+
+  .lado { position: absolute; left: 0; top: 0; bottom: 0; width: 210px; background: var(--marinho); padding: 26px 14px; color: var(--branco); }
+  .lado .marca { font-weight: 700; font-size: 25px; line-height: 1; padding: 0 12px 28px; }
+  .lado .marca span { display: block; font-weight: 500; font-size: 16px; color: var(--menta); margin-top: 4px; }
   .lado .menu { position: relative; }
-  .lado .sel { position: absolute; left: 0; right: 0; height: 52px; border-radius: 14px; background: var(--menta); }
-  .lado .op { position: relative; height: 52px; margin-bottom: 8px; border-radius: 14px; padding: 0 14px; display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 19px; }
-  .lado .op i { width: 18px; height: 18px; border-radius: 5px; border: 3px solid currentColor; }
-  .lado .op.off { opacity: .45; }
-  .pagina { position: absolute; left: 200px; right: 0; top: 0; bottom: 0; background: var(--cinza); padding: 26px 30px; }
+  .lado .sel { position: absolute; left: 0; right: 0; height: 52px; border-radius: 12px; background: rgba(88, 207, 182, .18); border-left: 4px solid var(--menta); }
+  .lado .op { position: relative; height: 52px; margin-bottom: 8px; border-radius: 12px; padding: 0 16px; display: flex; align-items: center; gap: 12px; font-weight: 500; font-size: 19px; }
+  .lado .op i { width: 16px; height: 16px; border-radius: 4px; border: 2.5px solid currentColor; opacity: .8; }
+  .lado .op.off { opacity: .4; }
+  .pagina { position: absolute; left: 210px; right: 0; top: 0; bottom: 0; background: var(--cinza); padding: 28px 32px; }
   .pagina.full { left: 0; padding: 0; z-index: 10; }
   .pagina img.print { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .pagina .cab { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-  .pagina .cab b { font-weight: 800; font-size: 36px; letter-spacing: -1px; }
-  .pagina .novo { background: var(--lampada); border-radius: 12px; padding: 10px 18px; font-weight: 700; font-size: 18px; }
+  .pagina .cab { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .pagina .cab b { font-weight: 700; font-size: 34px; letter-spacing: -1px; }
+  .pagina .cab span { border: 2px solid rgba(12, 43, 88, .2); border-radius: 10px; padding: 8px 16px; font-weight: 600; font-size: 16px; }
   .kpis { display: flex; gap: 14px; margin-bottom: 16px; }
-  .kpi { flex: 1; background: var(--branco); border-radius: 16px; padding: 14px 18px; }
-  .kpi small { display: block; font-weight: 600; font-size: 15px; opacity: .6; }
-  .kpi b { display: block; font-weight: 800; font-size: 28px; letter-spacing: -.5px; }
+  .kpi { flex: 1; background: var(--branco); border-radius: 14px; padding: 16px 18px; }
+  .kpi small { display: block; font-weight: 600; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; opacity: .55; }
+  .kpi b { display: block; margin-top: 4px; font-weight: 700; font-size: 28px; letter-spacing: -.5px; }
   .kpi.esc { background: var(--marinho); color: var(--branco); }
   .kpi.esc small { color: var(--menta); opacity: 1; }
-  .tab { background: var(--branco); border-radius: 16px; padding: 6px 18px; }
-  .tab .ln { display: flex; align-items: center; gap: 14px; height: 60px; border-bottom: 2px solid var(--cinza); font-size: 18px; font-weight: 600; }
+  .tab { background: var(--branco); border-radius: 14px; padding: 4px 20px; }
+  .tab .ln { display: flex; align-items: center; gap: 14px; height: 58px; border-bottom: 1.5px solid var(--cinza); font-size: 17px; font-weight: 500; }
   .tab .ln:last-child { border-bottom: 0; }
-  .tab .ln.h { height: 42px; font-size: 14px; font-weight: 700; opacity: .5; text-transform: uppercase; letter-spacing: 1px; }
-  .tab .av { flex: none; width: 38px; height: 38px; border-radius: 50%; background: var(--menta); font-weight: 800; font-size: 15px; display: flex; align-items: center; justify-content: center; }
-  .tab .c1 { flex: 1.6; } .tab .c2 { flex: 1.2; opacity: .65; font-weight: 500; } .tab .c3 { flex: 1; text-align: right; font-weight: 800; }
-  .chip { flex: none; font-weight: 700; font-size: 14px; padding: 5px 12px; border-radius: 10px; }
-  .chip.ok { background: var(--menta); color: var(--marinho); }
-  .chip.pend { background: var(--lampada); color: var(--marinho); }
-  .chip.novo { background: var(--marinho); color: var(--branco); }
-  .grafico { background: var(--branco); border-radius: 16px; padding: 18px 22px; }
-  .grafico small { font-weight: 700; font-size: 15px; opacity: .6; }
-  .barras { display: flex; align-items: flex-end; gap: 16px; height: 190px; margin-top: 12px; }
-  .barras div { flex: 1; display: flex; gap: 5px; align-items: flex-end; height: 100%; }
-  .barras i { flex: 1; border-radius: 6px 6px 2px 2px; background: var(--menta); }
-  .barras i.s { background: var(--marinho); opacity: .25; }
-  #cursor { position: absolute; left: 0; top: 0; width: 40px; height: 40px; z-index: 20; }
+  .tab .ln.h { height: 42px; font-size: 12px; font-weight: 600; opacity: .5; text-transform: uppercase; letter-spacing: 1.5px; }
+  .tab .c1 { flex: 1.6; font-weight: 600; } .tab .c2 { flex: 1.2; } .tab .c3 { flex: 1; text-align: right; font-weight: 700; }
+  .chip { flex: none; font-weight: 600; font-size: 13px; padding: 5px 12px; border-radius: 8px; }
+  .chip.ok { background: rgba(37, 152, 130, .15); color: var(--assinatura); }
+  .chip.pend { background: rgba(241, 190, 73, .3); color: var(--marinho); }
+  .chip.novo { background: rgba(12, 43, 88, .1); color: var(--marinho); }
   .duas { display: flex; gap: 14px; }
   .duas > div { flex: 1; }
-  .ranking { background: var(--branco); border-radius: 16px; padding: 18px 22px; }
-  .ranking small { font-weight: 700; font-size: 15px; opacity: .6; }
-  .rk { margin-top: 14px; font-size: 15px; font-weight: 600; }
-  .rk .lin { display: flex; justify-content: space-between; margin-bottom: 5px; }
-  .rk .lin b { font-weight: 800; }
-  .rk .trilho { height: 12px; border-radius: 6px; background: var(--cinza); overflow: hidden; }
-  .rk .trilho i { display: block; height: 100%; border-radius: 6px; background: var(--assinatura); transform-origin: 0 50%; }
-  .aviso { display: flex; align-items: center; gap: 12px; background: var(--lampada); border-radius: 14px; padding: 12px 18px; margin-bottom: 14px; font-weight: 700; font-size: 18px; }
-  .aviso span { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--marinho); color: var(--lampada); display: flex; align-items: center; justify-content: center; font-weight: 800; }
-  .nivel { flex: 1; height: 12px; border-radius: 6px; background: var(--cinza); overflow: hidden; }
-  .nivel i { display: block; height: 100%; border-radius: 6px; background: var(--menta); }
+  .cx { background: var(--branco); border-radius: 14px; padding: 18px 22px; }
+  .cx small { font-weight: 600; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; opacity: .55; }
+  .barras { display: flex; align-items: flex-end; gap: 14px; height: 250px; margin-top: 14px; border-bottom: 1.5px solid var(--cinza); }
+  .barras i { flex: 1; border-radius: 6px 6px 0 0; background: rgba(12, 43, 88, .18); transform-origin: 50% 100%; }
+  .barras i.on { background: var(--assinatura); }
+  .rk { margin-top: 16px; font-size: 15px; font-weight: 500; }
+  .rk .lin { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .rk .lin b { font-weight: 700; }
+  .rk .trilho { height: 8px; border-radius: 4px; background: var(--cinza); overflow: hidden; margin-bottom: 20px; }
+  .rk .trilho i { display: block; height: 100%; border-radius: 4px; background: var(--assinatura); transform-origin: 0 50%; }
+  .aviso { display: flex; align-items: center; gap: 12px; background: rgba(241, 190, 73, .25); border-left: 4px solid var(--lampada); border-radius: 10px; padding: 12px 18px; margin-bottom: 14px; font-weight: 600; font-size: 17px; }
+  .nivel { flex: 1.2; height: 8px; border-radius: 4px; background: var(--cinza); overflow: hidden; }
+  .nivel i { display: block; height: 100%; border-radius: 4px; background: var(--assinatura); }
   .nivel i.baixo { background: var(--lampada); }
-
+  #cursor { position: absolute; left: 0; top: 0; width: 30px; height: 30px; z-index: 20; }
 
   /* ---------- Cena 5 ---------- */
   #c5 { opacity: 1; }
-  #c5 .claro { position: absolute; inset: 0; background: var(--cinza); }
-  #c5 .vagas {
-    position: absolute; left: 0; right: 0; top: 1030px; text-align: center;
-    font-weight: 800; font-size: 132px; letter-spacing: -3px; color: var(--marinho);
-  }
+  #c5 .claro { position: absolute; inset: 0; background: var(--cinza); transform-origin: 50% 100%; }
+  #selo2 { position: absolute; left: 0; right: 0; top: 968px; text-align: center;
+    font-weight: 600; font-size: 26px; letter-spacing: 7px; color: var(--assinatura); }
+  #c5 .vagas { position: absolute; left: 0; right: 0; top: 1020px; text-align: center;
+    font-weight: 700; font-size: 116px; letter-spacing: -3px; color: var(--marinho); }
   #botao {
-    position: absolute; left: 50%; top: 1215px; transform-origin: 50% 50%;
-    background: var(--lampada); color: var(--marinho); border-radius: 999px;
-    padding: 34px 64px; font-weight: 800; font-size: 58px; white-space: nowrap; letter-spacing: -1px;
-    box-shadow: 0 16px 40px rgba(12, 43, 88, .28);
+    position: absolute; left: 50%; top: 1210px; display: flex; align-items: center; gap: 22px;
+    background: var(--lampada); color: var(--marinho); border-radius: 22px;
+    padding: 32px 52px; font-weight: 700; font-size: 50px; white-space: nowrap; letter-spacing: -1px;
   }
-  #c5 .comenta {
-    position: absolute; left: 0; right: 0; top: 1385px; text-align: center;
-    font-weight: 600; font-size: 44px; color: var(--marinho);
-  }
-  #selo2 {
-    position: absolute; left: 50%; top: 965px; transform-origin: 50% 50%; white-space: nowrap;
-    border: 4px solid var(--assinatura); color: var(--assinatura); border-radius: 999px;
-    padding: 8px 30px; font-weight: 800; font-size: 32px; letter-spacing: 4px;
-  }
-  #c5 .comenta b { font-weight: 800; color: var(--assinatura); }
+  #botao svg { width: 46px; height: 46px; }
+  #halo { position: absolute; inset: 0; border-radius: 22px; border: 3px solid var(--lampada); }
+  #c5 .comenta { position: absolute; left: 0; right: 0; top: 1385px; text-align: center;
+    font-weight: 500; font-size: 38px; color: var(--marinho); }
+  #c5 .comenta b { font-weight: 700; color: var(--assinatura); }
 
-  /* ---------- Legendas ---------- */
-  #legenda {
-    position: absolute; left: 60px; right: 60px; top: 1470px; height: 200px; z-index: 40;
-    display: flex; align-items: center; justify-content: center; text-align: center;
-  }
-  #legenda .bloco {
-    font-weight: 800; font-size: 80px; line-height: 1.08; letter-spacing: -1px; color: var(--branco);
-    -webkit-text-stroke: 14px var(--fundo); paint-order: stroke fill;
-  }
+  /* ---------- Legendas (desligadas por padrão no config) ---------- */
+  #legenda { position: absolute; left: 60px; right: 60px; top: 1470px; height: 200px; z-index: 40;
+    display: flex; align-items: center; justify-content: center; text-align: center; }
+  #legenda .bloco { font-weight: 700; font-size: 70px; line-height: 1.08; color: var(--branco);
+    -webkit-text-stroke: 12px var(--fundo); paint-order: stroke fill; }
   #legenda .bloco .k { color: var(--menta); }
-  #legenda.claro .bloco { color: var(--marinho); -webkit-text-stroke: 14px var(--cinza); }
+  #legenda.claro .bloco { color: var(--marinho); -webkit-text-stroke: 12px var(--cinza); }
   #legenda.claro .bloco .k { color: var(--assinatura); }
 </style>
 </head>
 <body>
-  <!-- Cena 1: o dinheiro some -->
+  <div id="fundo"><div class="brilho" id="brilho"></div><div class="grade" id="grade"></div></div>
+
+  <!-- Cena 1: vende, mas o dinheiro some -->
   <div class="cena" id="c1">
-    <div id="carteira">
-      <div id="moedas"></div>
-      <svg class="cart" viewBox="0 0 240 180">
-        <rect x="10" y="40" width="220" height="130" rx="26" fill="#0C2B58" stroke="#58CFB6" stroke-width="7"/>
-        <path d="M24 44 L170 8 Q186 4 190 20 L196 44" fill="none" stroke="#58CFB6" stroke-width="7" stroke-linejoin="round"/>
-        <rect x="150" y="86" width="80" height="44" rx="14" fill="#071939" stroke="#58CFB6" stroke-width="6"/>
-        <circle cx="176" cy="108" r="8" fill="#F1BE49"/>
-      </svg>
-    </div>
-    <div class="titulo">Sua empresa vende, mas o <span class="k" id="kchave">dinheiro some?</span></div>
-  </div>
-
-  <!-- Cena 2: dores de gestão -->
-  <div class="cena" id="c2">
-    <div class="linha" id="l1" style="top:520px">
-      <div class="icone"><svg width="78" height="78" viewBox="0 0 78 78"><path d="M8 20 L30 42 L44 30 L70 60" fill="none" stroke="#58CFB6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M52 60 H70 V42" fill="none" stroke="#58CFB6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="txt">Caixa sem controle</div>
-    </div>
-    <div class="linha" id="l2" style="top:760px">
-      <div class="icone"><svg width="78" height="78" viewBox="0 0 78 78"><path d="M39 6 L70 20 V56 L39 72 L8 56 V20 Z" fill="none" stroke="#58CFB6" stroke-width="7" stroke-linejoin="round"/><path d="M8 20 L39 35 L70 20 M39 35 V72" fill="none" stroke="#58CFB6" stroke-width="6" stroke-linejoin="round"/></svg></div>
-      <div class="txt">Estoque no chute</div>
-    </div>
-    <div class="linha alerta" id="l3" style="top:1000px">
-      <div class="icone"><svg width="78" height="78" viewBox="0 0 78 78"><rect x="8" y="14" width="62" height="56" rx="10" fill="none" stroke="#F1BE49" stroke-width="7"/><path d="M8 32 H70 M24 6 V20 M54 6 V20" stroke="#F1BE49" stroke-width="7" stroke-linecap="round"/><path d="M39 42 V52" stroke="#F1BE49" stroke-width="7" stroke-linecap="round"/><circle cx="39" cy="61" r="4" fill="#F1BE49"/></svg></div>
-      <div class="txt">Contas atrasadas</div>
-    </div>
-  </div>
-
-  <!-- Cena 3: um sistema só -->
-  <div class="cena" id="c3">
+    <div class="rotulo">Gestão financeira</div>
     <div class="titulo">
-      <div class="t1">Um sistema<br>de gestão</div>
-      <div class="t2">do seu jeito</div>
+      <span class="mask"><span>Sua empresa</span></span>
+      <span class="mask"><span>vende, mas o</span></span>
+      <span class="mask"><span class="k">dinheiro some?</span></span>
     </div>
-    <div id="moldura3"></div>
-    <div id="grade"></div>
+    <svg id="grafico1" viewBox="0 0 888 440">
+      <line class="eixo" x1="0" y1="80" x2="888" y2="80" stroke-dasharray="6 10"/>
+      <line class="eixo" x1="0" y1="200" x2="888" y2="200" stroke-dasharray="6 10"/>
+      <line class="eixo" x1="0" y1="320" x2="888" y2="320" stroke-dasharray="6 10"/>
+      <line class="eixo" x1="0" y1="400" x2="888" y2="400"/>
+      <path id="pVendas" pathLength="1" d="M0 330 C120 320 170 270 260 262 S420 210 500 180 S660 120 740 92" fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round"/>
+      <path id="pCaixa" pathLength="1" d="M0 300 C110 292 180 280 260 296 S420 300 500 318 S660 350 740 372" fill="none" stroke="#F1BE49" stroke-width="7" stroke-linecap="round"/>
+      <g id="fimV" opacity="0"><circle cx="740" cy="92" r="11" fill="#FFFFFF"/><text x="764" y="101" fill="#FFFFFF">Vendas</text></g>
+      <g id="fimC" opacity="0"><circle cx="740" cy="372" r="11" fill="#F1BE49"/><text x="764" y="381" fill="#F1BE49">Caixa</text></g>
+    </svg>
   </div>
 
-  <!-- Cena 4: computador -->
-  <div class="cena" id="c4">
-    <div id="pc">
-      <div class="monitor"><div class="cam"></div>
-        <div id="tela">
-          <div class="lado">
-            <div class="marca">GBR<span>Connect</span></div>
-            <div class="menu"><div class="sel" id="sel"></div>
-              <div class="op" id="op0"><i></i>Painel</div>
-              <div class="op" id="op1"><i></i>Estoque</div>
-              <div class="op" id="op2"><i></i>Contas</div>
-              <div class="op off"><i></i>Vendas</div>
-              <div class="op off"><i></i>Relatórios</div>
-            </div>
-          </div>
-          <svg id="cursor" viewBox="0 0 40 40"><path d="M6 3l26 17-12 2 7 13-5 3-7-13-9 8z" fill="#FFFFFF" stroke="#071939" stroke-width="2.5" stroke-linejoin="round"/></svg>
-        </div>
-      </div>
-      <div class="base"></div>
+  <!-- Cena 2: o dia a dia sem gestão -->
+  <div class="cena" id="c2">
+    <div class="rotulo">Sem gestão</div>
+    <div class="item2" id="l1" style="top:500px"><div class="num">01</div><div class="txt mask"><span>Caixa sem controle</span></div><div class="linha"></div></div>
+    <div class="item2" id="l2" style="top:720px"><div class="num">02</div><div class="txt mask"><span>Estoque no chute</span></div><div class="linha"></div></div>
+    <div class="item2" id="l3" style="top:940px"><div class="num">03</div><div class="txt mask"><span>Contas <span class="y">atrasadas</span></span></div><div class="linha"></div></div>
+  </div>
+
+  <!-- Cena 3: um sistema de gestão do seu jeito -->
+  <div class="cena" id="c3">
+    <div class="rotulo">A solução</div>
+    <div class="titulo">
+      <span class="mask"><span>Um sistema</span></span>
+      <span class="mask"><span>de gestão</span></span>
+      <span class="mask"><span class="k">do seu jeito.</span></span>
     </div>
+    <div id="kpis3"></div>
+  </div>
+
+  <!-- Cena 4: tudo num painel só -->
+  <div class="cena" id="c4">
+    <div class="rotulo">Tudo em um só lugar</div>
+    <div id="janela">
+      <div class="barra"><i></i><i></i><i></i><span>GBR Connect · Gestão</span></div>
+      <div id="tela">
+        <div class="lado">
+          <div class="marca">GBR<span>Connect</span></div>
+          <div class="menu"><div class="sel" id="sel"></div>
+            <div class="op" id="op0"><i></i>Painel</div>
+            <div class="op" id="op1"><i></i>Estoque</div>
+            <div class="op" id="op2"><i></i>Contas</div>
+            <div class="op off"><i></i>Vendas</div>
+            <div class="op off"><i></i>Relatórios</div>
+          </div>
+        </div>
+        <svg id="cursor" viewBox="0 0 40 40"><path d="M6 3l26 17-12 2 7 13-5 3-7-13-9 8z" fill="#0C2B58" stroke="#FFFFFF" stroke-width="2.5" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+    <div id="modulos"><span id="md0">Lucro<i></i></span><span id="md1">Estoque<i></i></span><span id="md2">Vencimentos<i></i></span></div>
   </div>
 
   <!-- Cena 5: chamada final -->
@@ -249,7 +239,9 @@
     <div class="claro" id="claro"></div>
     <div id="selo2">GESTÃO SOB MEDIDA</div>
     <div class="vagas" id="vagas">Só 2 vagas</div>
-    <div id="botao">Me chama no direct 📩</div>
+    <div id="botao"><div id="halo"></div>Me chama no direct
+      <svg viewBox="0 0 48 48"><path d="M6 23 L42 7 L32 42 L22 28 Z" fill="none" stroke="#0C2B58" stroke-width="4.5" stroke-linejoin="round"/><path d="M22 28 L42 7" stroke="#0C2B58" stroke-width="4.5" stroke-linecap="round"/></svg>
+    </div>
     <div class="comenta" id="comenta">ou comenta <b>EU QUERO</b></div>
   </div>
 
@@ -260,15 +252,29 @@
 // ---------------- utilidades ----------------
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 const prog = (t, a, b) => clamp((t - a) / (b - a));
-const eOut = x => 1 - Math.pow(1 - x, 3);
-const eInOut = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
-const eBack = x => { const c = 1.9; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const eOut = x => 1 - Math.pow(1 - x, 4);                     // desaceleração suave, sem rebote
+const eInOut = x => x < .5 ? 8 * x * x * x * x : 1 - Math.pow(-2 * x + 2, 4) / 2;
 const $ = id => document.getElementById(id);
 const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+const brl = v => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
 
 let D, CENAS, BLOCOS, FIM, P;   // dados vindos do render.js
 
-// Monta legendas, telas e cartões a partir dos dados
+// revela um texto subindo de dentro da máscara
+function revela(el, t, t0, dur = 0.45) {
+  const e = eOut(prog(t, t0, t0 + dur));
+  el.style.transform = `translateY(${(1 - e) * 110}%)`;
+}
+
+const KPIS3 = [
+  ['Lucro do mês', 8430, 'R$', '+12%', 'M0 36 L22 30 L44 32 L66 20 L88 22 L110 8 L130 4'],
+  ['Caixa', 12740, 'R$', '+8%', 'M0 30 L22 32 L44 24 L66 26 L88 16 L110 18 L130 10'],
+  ['Estoque', 248, 'itens', '3 baixos', 'M0 10 L22 14 L44 12 L66 22 L88 20 L110 30 L130 34', true],
+  ['A receber', 5900, 'R$', '7 dias', 'M0 34 L22 28 L44 30 L66 22 L88 24 L110 14 L130 12'],
+  ['A pagar', 3120, 'R$', '2 vencem', 'M0 20 L22 18 L44 24 L66 20 L88 26 L110 22 L130 28', true],
+  ['Margem', 32, '%', '+3 p.p.', 'M0 32 L22 30 L44 26 L66 28 L88 18 L110 14 L130 10'],
+];
+
 function montar(dados) {
   D = dados;
   CENAS = D.tempos.inicio_cenas;      // início de cada frase = troca de cena
@@ -276,21 +282,19 @@ function montar(dados) {
   P = D.tempos.palavras;
   $('logo').src = D.logo;
 
-  // Legendas da fala: config "legendas": false esconde e desce um pouco as cenas 1 a 4
+  // Legendas da fala (config "legendas"); sem legenda, as cenas descem um pouco
   if (D.cfg.legendas === false) {
     $('legenda').style.display = 'none';
     const d = D.cfg.descer_cenas_sem_legenda || 0;
     ['c1', 'c2', 'c3', 'c4'].forEach(id => $(id).style.transform = `translateY(${d}px)`);
   }
-
-  // Blocos de legenda
   BLOCOS = [];
   D.cfg.frases.forEach((frase, fi) => {
     const ws = P.filter(p => p.frase === fi);
     let k = 0;
-    D.cfg.legendas_palavras_por_bloco[fi].forEach(n => {
+    (D.cfg.legendas_palavras_por_bloco[fi] || [ws.length]).forEach(n => {
       const parte = ws.slice(k, k + n); k += n;
-      if (parte.length) BLOCOS.push({ inicio: fi === 0 && BLOCOS.length === 0 ? 0 : parte[0].inicio, texto: parte.map(p => p.texto).join(' '), claro: fi === 4 });
+      if (parte.length) BLOCOS.push({ inicio: BLOCOS.length === 0 ? 0 : parte[0].inicio, texto: parte.map(p => p.texto).join(' '), claro: fi === D.cfg.frases.length - 1 });
     });
   });
   BLOCOS.forEach(b => {
@@ -301,25 +305,16 @@ function montar(dados) {
     b.html = h;
   });
 
-  // Cartões bagunçados da cena 3: indicadores de gestão
-  const g = $('grade');
-  [['Lucro', 'R$ 8,4 mil'], ['Caixa', 'R$ 12,7 mil'], ['Estoque', '248 itens'],
-   ['A receber', 'R$ 5,9 mil'], ['Margem', '32%'], ['A pagar', 'R$ 3,1 mil'],
-   ['Vendas', '186'], ['Ticket médio', 'R$ 76'], ['Meta', '84%']].forEach(([rot, val]) => {
+  // Indicadores da cena 3
+  KPIS3.forEach((k, i) => {
     const c = document.createElement('div');
-    c.className = 'card';
-    c.innerHTML = `<small>${rot}</small><b>${val}</b><i style="width:${40 + (rot.length * 7) % 55}%"></i>`;
-    g.appendChild(c);
+    c.className = 'kpi3'; c.id = 'k' + i;
+    c.innerHTML = `<small>${k[0]}</small><b>-</b><span class="var${k[5] ? ' neg' : ''}">${k[3]}</span>` +
+      `<svg viewBox="0 0 130 44"><path d="${k[4]}" pathLength="1" fill="none" stroke="${k[5] ? '#F1BE49' : '#58CFB6'}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    $('kpis3').appendChild(c);
   });
 
-  // Moedas da cena 1
-  for (let i = 0; i < 7; i++) {
-    const m = document.createElement('div');
-    m.className = 'moeda'; m.textContent = 'R$';
-    $('moedas').appendChild(m);
-  }
-
-  // Telas do computador (print-N.png ocupa a tela inteira, senão tela fictícia)
+  // Telas do sistema (print-N.png ocupa a tela inteira, senão tela fictícia)
   ['Painel do mês', 'Estoque', 'Contas'].forEach((nome, i) => {
     const a = document.createElement('div');
     a.className = 'pagina' + (D.prints[i] ? ' full' : ''); a.id = 'pg' + i;
@@ -329,28 +324,28 @@ function montar(dados) {
 }
 
 function telaFicticia(i, nome) {
-  const cab = (botao) => `<div class="cab"><b>${nome}</b><span class="novo">${botao}</span></div>`;
+  const cab = (b) => `<div class="cab"><b>${nome}</b><span>${b}</span></div>`;
   if (i === 0) {
     const alt = [38, 52, 44, 61, 57, 72, 88];
     const rk = [['Produto A', 'R$ 3.120', 100], ['Produto B', 'R$ 2.240', 72], ['Produto C', 'R$ 1.610', 52], ['Produto D', 'R$ 980', 31]];
     return cab('Novembro') +
       `<div class="kpis"><div class="kpi"><small>Faturamento</small><b>R$ 26.400</b></div><div class="kpi esc"><small>Lucro do mês</small><b id="lucroNum">R$ 8.430</b></div><div class="kpi"><small>Margem</small><b>32%</b></div></div>` +
-      `<div class="duas"><div class="grafico"><small>Lucro por mês</small><div class="barras" style="height:230px">${alt.map((h, k) => `<div><i class="cres" style="height:${h}%;${k === 6 ? 'background:#259882' : ''}"></i></div>`).join('')}</div></div>` +
-      `<div class="ranking"><small>Lucro por produto</small><div class="rk">${rk.map(r => `<div style="margin-bottom:16px"><div class="lin"><span>${r[0]}</span><b>${r[1]}</b></div><div class="trilho"><i class="cres2" style="width:${r[2]}%"></i></div></div>`).join('')}</div></div></div>`;
+      `<div class="duas"><div class="cx"><small>Lucro por mês</small><div class="barras">${alt.map((h, k) => `<i class="cres${k === 6 ? ' on' : ''}" style="height:${h}%"></i>`).join('')}</div></div>` +
+      `<div class="cx"><small>Lucro por produto</small><div class="rk">${rk.map(r => `<div class="lin"><span>${r[0]}</span><b>${r[1]}</b></div><div class="trilho"><i class="cres2" style="width:${r[2]}%"></i></div>`).join('')}</div></div></div>`;
   }
   if (i === 1) {
     const it = [['Caixa kraft P', '12 un', 8, 'pend', 'Baixo'], ['Fita adesiva', '9 un', 6, 'pend', 'Baixo'], ['Etiqueta térmica', '30 un', 14, 'pend', 'Baixo'],
-                ['Sacola M', '420 un', 78, 'ok', 'Ok'], ['Copo 300 ml', '1.150 un', 92, 'ok', 'Ok']];
-    return cab('+ Entrada') + `<div class="aviso"><span>!</span>3 produtos com estoque baixo</div>` +
+                ['Sacola M', '420 un', 78, 'ok', 'Normal'], ['Copo 300 ml', '1.150 un', 92, 'ok', 'Normal']];
+    return cab('+ Entrada') + `<div class="aviso">3 produtos abaixo do estoque mínimo</div>` +
       `<div class="tab"><div class="ln h"><span class="c1">Produto</span><span class="c2" style="flex:.7">Qtd</span><span style="flex:1.2">Nível</span><span class="c3" style="flex:.7">Status</span></div>` +
-      it.map(r => `<div class="ln"><span class="c1">${r[0]}</span><span class="c2" style="flex:.7">${r[1]}</span><span class="nivel" style="flex:1.2"><i class="${r[3] === 'pend' ? 'baixo' : ''}" style="width:${r[2]}%"></i></span><span class="c3" style="flex:.7"><span class="chip ${r[3]}">${r[4]}</span></span></div>`).join('') + `</div>`;
+      it.map(r => `<div class="ln"><span class="c1">${r[0]}</span><span class="c2" style="flex:.7">${r[1]}</span><span class="nivel"><i class="${r[3] === 'pend' ? 'baixo' : ''}" style="width:${r[2]}%"></i></span><span class="c3" style="flex:.7"><span class="chip ${r[3]}">${r[4]}</span></span></div>`).join('') + `</div>`;
   }
   const ct = [['Fornecedor de embalagens', 'Vence amanhã', 'pend', '- R$ 840'], ['Energia', 'Vence hoje', 'pend', '- R$ 380'],
               ['Pedido #0142', 'Recebido', 'ok', '+ R$ 1.250'], ['Aluguel', 'Vence dia 10', 'novo', '- R$ 1.500']];
   return cab('+ Lançamento') +
     `<div class="kpis"><div class="kpi"><small>A receber</small><b>R$ 5.900</b></div><div class="kpi"><small>A pagar</small><b>R$ 3.120</b></div><div class="kpi esc"><small>Saldo previsto</small><b>R$ 2.780</b></div></div>` +
     `<div class="tab"><div class="ln h"><span class="c1">Lançamento</span><span class="c2">Vencimento</span><span class="c3">Valor</span></div>` +
-    ct.map(r => `<div class="ln"><span class="c1">${r[0]}</span><span class="c2" style="opacity:1"><span class="chip ${r[2]}">${r[1]}</span></span><span class="c3">${r[3]}</span></div>`).join('') + `</div>`;
+    ct.map(r => `<div class="ln"><span class="c1">${r[0]}</span><span class="c2"><span class="chip ${r[2]}">${r[1]}</span></span><span class="c3">${r[3]}</span></div>`).join('') + `</div>`;
 }
 
 // tempo da k-ésima palavra da frase fi
@@ -358,137 +353,130 @@ const tp = (fi, k) => { const ws = P.filter(p => p.frase === fi); return ws[Math
 // tempo da palavra (pelo texto) na frase fi; se não achar, usa o índice reserva
 const tw = (fi, palavra, reserva) => { const w = P.find(p => p.frase === fi && p.texto.toLowerCase().startsWith(palavra)); return w ? w.inicio : tp(fi, reserva); };
 
-// opacidade de uma cena: entra rápido no início da frase, sai rápido no início da próxima
+// opacidade de uma cena: entra no início da frase, sai no início da próxima
 function visCena(t, i) {
   const ini = CENAS[i], fim = i + 1 < CENAS.length ? CENAS[i + 1] : 1e9;
-  const entra = i === 0 ? 1 : prog(t, ini, ini + 0.14);
-  const sai = 1 - prog(t, fim, fim + 0.12);
+  const entra = i === 0 ? 1 : prog(t, ini, ini + 0.2);
+  const sai = 1 - prog(t, fim - 0.02, fim + 0.14);
   return Math.min(entra, sai);
 }
+const saida = (t, i) => { const fim = i + 1 < CENAS.length ? CENAS[i + 1] : 1e9; return eInOut(prog(t, fim - 0.02, fim + 0.16)); };
 
 // ---------------- quadro a quadro ----------------
 function setTime(t) {
   const [T1, T2, T3, T4, T5] = CENAS;
 
+  // ----- fundo: deriva lenta -----
+  $('brilho').style.transform = `translate(${-100 + Math.sin(t * 0.35) * 60}px, ${-500 + t * 18}px)`;
+  $('grade').style.transform = `translateY(${-((t * 6) % 90)}px)`;
+
   // ----- selo -----
   const selo = $('selo');
-  const pop = eBack(prog(t, 0.15, 0.55));
-  const saiSelo = 1 - prog(t, T5, T5 + 0.18);
-  selo.style.opacity = Math.min(prog(t, 0.15, 0.25), saiSelo);
-  selo.style.transform = `scale(${0.4 + 0.6 * pop - 0.3 * (1 - saiSelo)})`;
+  const pop = eOut(prog(t, 0.2, 0.6));
+  const saiSelo = 1 - prog(t, T5, T5 + 0.2);
+  selo.style.opacity = Math.min(pop, saiSelo);
+  selo.style.transform = `scale(${0.9 + 0.1 * pop})`;
 
   // ----- cena 1 -----
-  const c1 = $('c1'); const v1 = visCena(t, 0);
-  c1.style.opacity = v1;
-  const sx = Math.sin(t * 57) * 3.2 + Math.sin(t * 23) * 2.2, sy = Math.cos(t * 49) * 2.4, sr = Math.sin(t * 31) * 0.7;
-  c1.querySelector('.titulo').style.transform = `translate(${sx}px,${sy}px) rotate(${sr}deg) translateY(${-60 * prog(t, T2, T2 + 0.12)}px)`;
-  const kc = prog(t, tw(0, 'dinheiro', 5) - 0.02, tw(0, 'dinheiro', 5) + 0.35);
-  $('kchave').style.transform = `scale(${1 + 0.12 * Math.sin(Math.PI * kc)})`;
-  // moedas saindo da carteira e sumindo
-  [...$('moedas').children].forEach((m, i) => {
-    const fase = ((t * 0.85 + i / 7) % 1 + 1) % 1;
-    const x = 164 + Math.sin(i * 2.3) * 120 * fase + Math.sin(t * 3 + i) * 10;
-    const y = 220 - fase * 300;
-    const op = Math.min(1, fase * 6) * (1 - prog(fase, 0.55, 1));
-    m.style.transform = `translate(${x}px,${y}px) rotate(${Math.sin(i * 1.7) * 40 * fase}deg) scale(${0.7 + 0.4 * (1 - fase)})`;
-    m.style.opacity = op;
-  });
+  const c1 = $('c1'); c1.style.opacity = visCena(t, 0);
+  c1.querySelector('.titulo').style.transform = `translateY(${-40 * saida(t, 0)}px)`;   // gancho já no 1º quadro
+  const g1 = eInOut(prog(t, 0.15, 1.9));
+  ['pVendas', 'pCaixa'].forEach(id => { $(id).style.strokeDasharray = '1 1'; $(id).style.strokeDashoffset = 1 - g1; });
+  $('fimV').setAttribute('opacity', prog(t, 1.8, 2.05));
+  $('fimC').setAttribute('opacity', prog(t, 1.8, 2.05));
 
   // ----- cena 2 -----
   const c2 = $('c2'); c2.style.opacity = visCena(t, 1);
-  const entradas2 = [tw(1, 'caixa', 3), tw(1, 'estoque', 4), tw(1, 'contas', 6)];
-  [['l1', 0], ['l2', 1], ['l3', 2]].forEach(([id, k], n, arr) => {
-    const t0 = entradas2[k] - 0.06;
-    const e = prog(t, t0, t0 + 0.2);
-    const x = (1 - eBack(e)) * 900;
-    const prox = n + 1 < arr.length ? entradas2[arr[n + 1][1]] - 0.06 : 1e9;
-    const apaga = n < 2 ? 1 - 0.45 * prog(t, prox, prox + 0.2) : 1;
+  const ent2 = [tw(1, 'caixa', 3), tw(1, 'estoque', 4), tw(1, 'contas', 6)];
+  ['l1', 'l2', 'l3'].forEach((id, n) => {
+    const t0 = Math.max(T2, ent2[n] - 0.12);
     const el = $(id);
-    el.style.transform = `translateX(${x}px)`;
-    el.style.opacity = Math.min(prog(t, t0, t0 + 0.06), 1) * apaga;
+    revela(el.querySelector('.txt > span'), t, t0);
+    el.querySelector('.num').style.opacity = prog(t, t0, t0 + 0.25);
+    el.querySelector('.linha').style.transform = `scaleX(${eOut(prog(t, t0, t0 + 0.6))})`;
+    const prox = n < 2 ? ent2[n + 1] - 0.12 : 1e9;
+    el.style.opacity = 1 - 0.5 * prog(t, prox, prox + 0.3);
   });
 
   // ----- cena 3 -----
   const c3 = $('c3'); c3.style.opacity = visCena(t, 2);
-  const tit3 = eOut(prog(t, T3, T3 + 0.25));
-  c3.querySelector('.titulo').style.transform = `translateY(${(1 - tit3) * 50}px)`;
-  const alinhaIni = tw(2, 'sistema', 5) - 0.1, alinhaFim = alinhaIni + 0.7;   // "sistema" alinha tudo
-  const a = eInOut(prog(t, alinhaIni, alinhaFim));
-  const cards = $('grade').children;
-  const W = 230, H = 150, G = 28, gx = (1080 - (3 * W + 2 * G)) / 2, gy = 820;
-  for (let i = 0; i < cards.length; i++) {
-    const r = Math.sin(i * 91.7) * 0.5 + 0.5, s = Math.cos(i * 37.3) * 0.5 + 0.5;
-    const bx = 40 + r * (1080 - W - 80), by = 700 + s * 640;
-    const brot = (Math.sin(i * 13.1) * 38);
-    const jit = (1 - a);
-    const fx = gx + (i % 3) * (W + G), fy = gy + Math.floor(i / 3) * (H + G);
-    const x = bx + (fx - bx) * a + Math.sin(t * 6 + i) * 10 * jit;
-    const y = by + (fy - by) * a + Math.cos(t * 5 + i * 2) * 10 * jit;
-    const rot = brot * (1 - a) + Math.sin(t * 4 + i) * 4 * jit;
-    const ent = eBack(prog(t, T3 + i * 0.03, T3 + 0.25 + i * 0.03));
-    cards[i].style.transform = `translate(${x}px,${y}px) rotate(${rot}deg) scale(${ent})`;
-  }
-  const m = $('moldura3'); const mo = eOut(prog(t, alinhaFim - 0.05, alinhaFim + 0.3));
-  const pad = 30 + 40 * (1 - mo);
-  m.style.left = gx - pad + 'px'; m.style.top = gy - pad + 'px';
-  m.style.width = 3 * W + 2 * G + 2 * pad + 'px'; m.style.height = 3 * H + 2 * G + 2 * pad + 'px';
-  m.style.opacity = mo;
+  c3.querySelectorAll('.titulo .mask > span').forEach((el, n) => revela(el, t, T3 + n * 0.1));
+  const alinha = tw(2, 'sistema', 3);
+  const W = 432, H = 176, G = 24, gx = 96, gy = 800;
+  KPIS3.forEach((k, i) => {
+    const el = $('k' + i);
+    const fx = gx + (i % 2) * (W + G), fy = gy + Math.floor(i / 2) * (H + G);
+    // começam espalhados e se alinham na palavra "sistema"
+    const ox = Math.sin(i * 7.3) * 140, oy = Math.cos(i * 4.1) * 120 + 60;
+    const a = eInOut(prog(t, alinha - 0.25 + i * 0.05, alinha + 0.45 + i * 0.05));
+    el.style.transform = `translate(${fx + ox * (1 - a)}px, ${fy + oy * (1 - a)}px) scale(${0.94 + 0.06 * a})`;
+    el.style.opacity = Math.min(prog(t, T3 + 0.05 + i * 0.05, T3 + 0.35 + i * 0.05), 0.35 + 0.65 * a);
+    const v = k[1] * eOut(prog(t, alinha + 0.2, alinha + 1.2));
+    el.querySelector('b').textContent = k[2] === 'R$' ? brl(v) : k[2] === '%' ? Math.round(v) + '%' : Math.round(v) + ' ' + k[2];
+    const sp = el.querySelector('path');
+    sp.style.strokeDasharray = '1 1'; sp.style.strokeDashoffset = 1 - eOut(prog(t, alinha + 0.3 + i * 0.05, alinha + 1.1 + i * 0.05));
+  });
 
-  // ----- cena 4: computador -----
+  // ----- cena 4: janela do sistema -----
   const c4 = $('c4'); c4.style.opacity = visCena(t, 3);
-  const ent4 = eBack(prog(t, T4, T4 + 0.32));
-  $('pc').style.transform = `translateY(${(1 - ent4) * 600 + Math.sin(t * 2.4) * 8}px) scale(${0.9 + 0.1 * ent4})`;
-  // sequência de telas sincronizada com a fala: Lucro > estoque > vencimentos > painel
+  const ent4 = eOut(prog(t, T4, T4 + 0.5));
+  $('janela').style.transform = `perspective(1600px) translateY(${(1 - ent4) * 80}px) rotateX(${(1 - ent4) * 14}deg)`;
+  $('janela').style.opacity = prog(t, T4, T4 + 0.25);
   const seq = [[T4 - 1, 0], [tw(3, 'estoque', 1) - 0.08, 1], [tw(3, 'vencimento', 3) - 0.08, 2], [tw(3, 'painel', 5) - 0.08, 0]]
     .filter((x, k, arr) => k === 0 || x[0] > arr[k - 1][0]);
   let k4 = 0;
   seq.forEach((x, k) => { if (t >= x[0]) k4 = k; });
   const pgAtual = seq[k4][1], pgAntes = k4 > 0 ? seq[k4 - 1][1] : pgAtual;
-  const entraPg = k4 === 0 ? 1 : eOut(prog(t, seq[k4][0], seq[k4][0] + 0.22));
+  const entraPg = k4 === 0 ? 1 : eOut(prog(t, seq[k4][0], seq[k4][0] + 0.25));
   for (let i = 0; i < 3; i++) {
     const el = $('pg' + i), full = el.classList.contains('full') ? 10 : 0;
-    if (i === pgAtual) { el.style.opacity = entraPg; el.style.transform = `translateY(${(1 - entraPg) * 40}px)`; el.style.zIndex = full + 3; }
+    if (i === pgAtual) { el.style.opacity = entraPg; el.style.transform = `translateY(${(1 - entraPg) * 24}px)`; el.style.zIndex = full + 3; }
     else if (i === pgAntes) { el.style.opacity = 1; el.style.transform = 'none'; el.style.zIndex = full + 2; }
     else { el.style.opacity = 0; el.style.zIndex = full + 1; }
   }
-  // painel: lucro contando e gráficos crescendo
-  const cresce = eOut(prog(t, T4 + 0.15, T4 + 1.0));
-  const ln = $('lucroNum');
-  if (ln) ln.textContent = 'R$ ' + Math.round(8430 * cresce).toLocaleString('pt-BR');
-  document.querySelectorAll('#pg0 .cres').forEach((el, k) => { el.style.transformOrigin = '50% 100%'; el.style.transform = `scaleY(${eOut(prog(t, T4 + 0.1 + k * 0.05, T4 + 0.6 + k * 0.05))})`; });
-  document.querySelectorAll('#pg0 .cres2').forEach((el, k) => { el.style.transform = `scaleX(${eOut(prog(t, T4 + 0.3 + k * 0.08, T4 + 0.9 + k * 0.08))})`; });
-  // destaque do menu desliza até o item clicado
-  const eSel = k4 === 0 ? 1 : eOut(prog(t, seq[k4][0] - 0.04, seq[k4][0] + 0.16));
+  // indicadores do painel
+  const cresce = eOut(prog(t, T4 + 0.2, T4 + 1.1));
+  if ($('lucroNum')) $('lucroNum').textContent = brl(8430 * cresce);
+  document.querySelectorAll('#pg0 .cres').forEach((el, k) => el.style.transform = `scaleY(${eOut(prog(t, T4 + 0.15 + k * 0.05, T4 + 0.75 + k * 0.05))})`);
+  document.querySelectorAll('#pg0 .cres2').forEach((el, k) => el.style.transform = `scaleX(${eOut(prog(t, T4 + 0.3 + k * 0.08, T4 + 1.0 + k * 0.08))})`);
+  // menu lateral
+  const eSel = k4 === 0 ? 1 : eOut(prog(t, seq[k4][0] - 0.04, seq[k4][0] + 0.2));
   $('sel').style.transform = `translateY(${60 * (pgAntes + (pgAtual - pgAntes) * eSel)}px)`;
-  for (let i = 0; i < 3; i++) $('op' + i).style.color = i === pgAtual ? '#0C2B58' : '#FFFFFF';
-  // cursor: vai até o item da próxima tela e clica
-  const alvo = i => [150, $('op' + i).parentNode.offsetTop + $('op' + i).offsetTop + 18];
-  let [cx, cy] = [520, 420];
+  // módulos abaixo da janela acendem junto com a fala
+  const mdT = [T4, tw(3, 'estoque', 1), tw(3, 'vencimento', 3)];
+  for (let i = 0; i < 3; i++) {
+    const on = prog(t, mdT[i] - 0.05, mdT[i] + 0.2);
+    $('md' + i).style.color = `rgba(255,255,255,${0.35 + 0.65 * on})`;
+    $('md' + i).querySelector('i').style.transform = `scaleX(${eOut(on)})`;
+  }
+  // cursor
+  const alvo = i => [160, $('op' + i).parentNode.offsetTop + $('op' + i).offsetTop + 20];
+  let [cx, cy] = [560, 430];
   let clique = 0;
   for (let k = 1; k < seq.length; k++) {
     const tk = seq[k][0];
     const m = eInOut(prog(t, tk - 0.45, tk - 0.06));
-    const de = k === 1 ? [520, 420] : alvo(seq[k - 1][1]), para = alvo(seq[k][1]);
+    const de = k === 1 ? [560, 430] : alvo(seq[k - 1][1]), para = alvo(seq[k][1]);
     if (t >= tk - 0.45) { cx = de[0] + (para[0] - de[0]) * m; cy = de[1] + (para[1] - de[1]) * m; }
-    clique = Math.max(clique, Math.sin(Math.PI * prog(t, tk - 0.08, tk + 0.1)));
+    clique = Math.max(clique, Math.sin(Math.PI * prog(t, tk - 0.06, tk + 0.08)));
   }
-  $('cursor').style.transform = `translate(${cx}px,${cy}px) scale(${1 - 0.2 * clique})`;
+  $('cursor').style.transform = `translate(${cx}px,${cy}px) scale(${1 - 0.12 * clique})`;
+  $('cursor').style.opacity = prog(t, T4 + 0.3, T4 + 0.5);
 
   // ----- cena 5 -----
   const c5 = $('c5');
-  const w = eOut(prog(t, T5, T5 + 0.28));
-  $('claro').style.clipPath = `circle(${w * 1150}px at 540px 960px)`;
   c5.style.visibility = t >= T5 ? 'visible' : 'hidden';
-  const e1 = eBack(prog(t, T5 + 0.12, T5 + 0.4));
-  $('vagas').style.transform = `scale(${e1})`; $('vagas').style.opacity = prog(t, T5 + 0.12, T5 + 0.2);
-  const e0 = eBack(prog(t, T5 + 0.2, T5 + 0.45));
-  $('selo2').style.transform = `translateX(-50%) scale(${e0})`; $('selo2').style.opacity = prog(t, T5 + 0.2, T5 + 0.28);
-  const e2 = eBack(prog(t, T5 + 0.3, T5 + 0.6));
-  const pulso = 1 + 0.055 * Math.max(0, Math.sin((t - T5) * Math.PI * 2 / 0.85));
-  $('botao').style.transform = `translateX(-50%) scale(${e2 * pulso})`;
-  $('botao').style.opacity = prog(t, T5 + 0.3, T5 + 0.38);
-  $('comenta').style.opacity = prog(t, T5 + 0.5, T5 + 0.7);
-  $('comenta').style.transform = `translateY(${(1 - eOut(prog(t, T5 + 0.5, T5 + 0.75))) * 30}px)`;
+  $('claro').style.transform = `scaleY(${eInOut(prog(t, T5, T5 + 0.32))})`;
+  const sobe = (el, t0) => { const e = eOut(prog(t, t0, t0 + 0.45)); el.style.opacity = prog(t, t0, t0 + 0.2); return (1 - e) * 30; };
+  $('selo2').style.transform = `translateY(${sobe($('selo2'), T5 + 0.25)}px)`;
+  $('vagas').style.transform = `translateY(${sobe($('vagas'), T5 + 0.32)}px)`;
+  const yb = sobe($('botao'), T5 + 0.42);
+  const pulso = ((t - T5 - 0.9) % 1.1 + 1.1) % 1.1 / 1.1;
+  const ativo = t > T5 + 0.9;
+  $('botao').style.transform = `translate(-50%, ${yb}px) scale(${ativo ? 1 + 0.025 * Math.sin(Math.PI * pulso) : 1})`;
+  $('halo').style.transform = `scale(${1 + 0.08 * eOut(pulso)}, ${1 + 0.3 * eOut(pulso)})`;
+  $('halo').style.opacity = ativo ? 0.7 * (1 - pulso) : 0;
+  $('comenta').style.transform = `translateY(${sobe($('comenta'), T5 + 0.55)}px)`;
 
   // ----- legenda -----
   let b = null;
@@ -496,9 +484,7 @@ function setTime(t) {
   const bl = $('bloco');
   if (b) {
     if (bl.dataset.txt !== b.texto) { bl.innerHTML = b.html; bl.dataset.txt = b.texto; }
-    const pb = eBack(prog(t, b.inicio, b.inicio + 0.12));
-    bl.style.transform = `scale(${0.82 + 0.18 * pb})`;
-    $('legenda').className = b.claro && t >= T5 + 0.05 ? 'claro' : '';
+    $('legenda').className = b.claro && t >= T5 + 0.1 ? 'claro' : '';
   }
 }
 </script>
