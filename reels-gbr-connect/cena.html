@@ -254,6 +254,13 @@ function montar(dados) {
   P = D.tempos.palavras;
   $('logo').src = D.logo;
 
+  // Legendas da fala: config "legendas": false esconde e desce um pouco as cenas 1 a 4
+  if (D.cfg.legendas === false) {
+    $('legenda').style.display = 'none';
+    const d = D.cfg.descer_cenas_sem_legenda || 0;
+    ['c1', 'c2', 'c3', 'c4'].forEach(id => $(id).style.transform = `translateY(${d}px)`);
+  }
+
   // Blocos de legenda
   BLOCOS = [];
   D.cfg.frases.forEach((frase, fi) => {

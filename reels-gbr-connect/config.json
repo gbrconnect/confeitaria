@@ -13,6 +13,8 @@
     "Clientes, orçamentos e financeiro no computador.",
     "Tenho só duas vagas. Me chama no direct!"
   ],
+  "legendas": false,
+  "descer_cenas_sem_legenda": 120,
   "legendas_palavras_por_bloco": [
     [
       3,
