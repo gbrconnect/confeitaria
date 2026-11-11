@@ -133,22 +133,22 @@ def main():
     T5 = tempos["inicio_cenas"][-1]
     entra = T5 + 0.12                     # a animação entra junto com a troca de fundo
     ini, fim = a["inicio"], a["fim"]
-    trecho = fim - ini
+    completa = min(fim, a.get("logo_completa_em", fim))   # a partir daqui a logo está completa e parada
     parada = a["logo_parada_minimo"]
-    dur = min(CFG["duracao_maxima"], max(tempos["fim_fala"] + 0.6, entra + trecho + parada + 0.2))
+    dur = min(CFG["duracao_maxima"], max(tempos["fim_fala"] + 0.8, entra + (completa - ini) + parada + 0.3))
     dur = round(dur * FPS) / FPS
-    disponivel = dur - entra - parada     # tempo para tocar o trecho
+    disponivel = dur - entra - parada     # tempo para a animação chegar na logo completa
     velocidade = 1.0
-    if trecho > disponivel:
-        velocidade = min(a["aceleracao_maxima"], trecho / disponivel)
-        if trecho / velocidade > disponivel:   # ainda não cabe: corta o começo
-            ini = fim - disponivel * velocidade
-    tocado = (fim - ini) / velocidade
+    if completa - ini > disponivel:
+        velocidade = min(a["aceleracao_maxima"], (completa - ini) / disponivel)
+        if (completa - ini) / velocidade > disponivel:   # ainda não cabe: corta o começo
+            ini = completa - disponivel * velocidade
+    tocado = (min(fim, ini + (dur - entra) * velocidade) - ini) / velocidade
     print(f"   vídeo {dur:.2f}s | cena final em {T5:.2f}s | animação {ini:.2f}s a {fim:.2f}s, "
-          f"velocidade {velocidade:.2f}x, toca {tocado:.2f}s e fica parada {dur - entra - tocado:.2f}s")
+          f"velocidade {velocidade:.2f}x, logo completa e parada por {dur - entra - (completa - ini) / velocidade:.2f}s")
 
     W, H, _ = info_video(anim)
-    cw, ch, cx, cy = recorte_auto(anim, ini, fim, W, H)
+    cw, ch, cx, cy = recorte_auto(anim, completa, fim, W, H)
     larg = a["largura_na_tela"]
     alt = round(ch * larg / cw / 2) * 2
     if alt > 700:                         # logo muito alta: limita para não invadir o texto
@@ -157,6 +157,16 @@ def main():
     ox, oy = (1080 - larg) // 2, max(210, a["centro_y"] - alt // 2)
     print(f"   recorte {cw}x{ch} em ({cx},{cy}) > {larg}x{alt} em ({ox},{oy})")
     mask = mascara(larg, alt, a["esfumado"])
+
+    # Ajuste de cor: leva o fundo da animação para o cinza da cena (#E8EDF5)
+    ref = Image.open(p("build", "recorte", "7.png")).convert("RGB").crop((cx, cy, cx + cw, cy + ch))
+    borda = [ref.getpixel((x, y)) for x in range(0, cw, 8) for y in (2, ch - 3)] + \
+            [ref.getpixel((x, y)) for y in range(0, ch, 8) for x in (2, cw - 3)]
+    fundo = [sorted(px[i] for px in borda)[len(borda) // 2] for i in range(3)]
+    alvo = (0xE8, 0xED, 0xF5)
+    ganho = [min(1.0, alvo[i] / max(1, fundo[i])) for i in range(3)]
+    cor = f"colorchannelmixer=rr={ganho[0]:.4f}:gg={ganho[1]:.4f}:bb={ganho[2]:.4f}," if a.get("igualar_fundo", True) else ""
+    print(f"   fundo da animação {tuple(fundo)} > ganho {[round(g, 3) for g in ganho]}")
 
     # ---- cenas em HTML
     print("3) Cenas (Playwright)")
@@ -171,7 +181,7 @@ def main():
     sobra = dur - entra - tocado + 1
     filtro = (
         f"[1:v]trim=start={ini:.3f}:end={fim:.3f},setpts=(PTS-STARTPTS)/{velocidade:.4f},fps={FPS},"
-        f"crop={cw}:{ch}:{cx}:{cy},scale={larg}:{alt}:flags=lanczos,"
+        f"crop={cw}:{ch}:{cx}:{cy},scale={larg}:{alt}:flags=lanczos,{cor}"
         f"tpad=stop_mode=clone:stop_duration={sobra:.3f},format=rgba[an];"
         f"[2:v]format=gray,scale={larg}:{alt}[mk];"
         f"[an][mk]alphamerge,fade=in:st=0:d=0.22:alpha=1,setpts=PTS+{entra:.3f}/TB[anim];"

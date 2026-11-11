@@ -76,38 +76,53 @@
     box-shadow: 0 0 60px rgba(88, 207, 182, .35);
   }
 
-  /* ---------- Cena 4 ---------- */
-  #celular {
-    position: absolute; left: 50%; top: 330px; width: 510px; height: 1030px; margin-left: -255px;
-    border-radius: 78px; background: var(--marinho); padding: 20px;
+  /* ---------- Cena 4: computador ---------- */
+  #pc { position: absolute; left: 50%; top: 580px; width: 940px; margin-left: -470px; transform-origin: 50% 100%; }
+  #pc .monitor {
+    position: relative; width: 940px; height: 592px; border-radius: 30px; background: var(--marinho); padding: 22px 22px 22px;
     box-shadow: 0 0 0 4px var(--menta), 0 40px 90px rgba(0, 0, 0, .55);
   }
-  #celular .tela { position: relative; width: 100%; height: 100%; border-radius: 60px; overflow: hidden; background: var(--cinza); }
-  #celular .notch { position: absolute; top: 34px; left: 50%; width: 150px; height: 38px; margin-left: -75px; border-radius: 20px; background: var(--fundo); z-index: 5; }
-  .app { position: absolute; inset: 0; color: var(--marinho); background: var(--cinza); }
-  .app img.print { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .app .topo { background: var(--marinho); color: var(--branco); padding: 100px 34px 34px; }
-  .app .topo small { display: block; font-weight: 500; font-size: 22px; color: var(--menta); }
-  .app .topo b { display: block; font-weight: 800; font-size: 50px; letter-spacing: -1px; }
-  .app .busca { margin: 24px 26px 8px; height: 58px; border-radius: 29px; background: var(--branco); padding: 0 24px; display: flex; align-items: center; font-size: 22px; font-weight: 500; color: var(--marinho); opacity: .6; }
-  .app .item { margin: 14px 26px; background: var(--branco); border-radius: 24px; padding: 18px 20px; display: flex; align-items: center; gap: 16px; }
-  .app .av { flex: none; width: 58px; height: 58px; border-radius: 50%; background: var(--menta); color: var(--marinho); font-weight: 800; font-size: 24px; display: flex; align-items: center; justify-content: center; }
-  .app .nome { flex: 1; font-weight: 700; font-size: 24px; line-height: 1.2; }
-  .app .nome small { display: block; font-weight: 500; font-size: 18px; opacity: .6; }
-  .app .chip { flex: none; font-weight: 700; font-size: 17px; padding: 6px 14px; border-radius: 14px; }
+  #pc .cam { position: absolute; top: 8px; left: 50%; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: var(--fundo); }
+  #pc .base { width: 1000px; height: 30px; margin: 0 -30px; border-radius: 4px 4px 26px 26px; background: var(--marinho); box-shadow: inset 0 4px 0 var(--menta); position: relative; }
+  #pc .base:after { content: ""; position: absolute; top: 4px; left: 50%; width: 160px; height: 10px; margin-left: -80px; border-radius: 0 0 10px 10px; background: var(--fundo); opacity: .6; }
+  #tela { position: relative; width: 896px; height: 548px; border-radius: 12px; overflow: hidden; background: var(--cinza); color: var(--marinho); }
+  .lado { position: absolute; left: 0; top: 0; bottom: 0; width: 200px; background: var(--marinho); padding: 24px 14px; color: var(--branco); }
+  .lado .marca { font-weight: 800; font-size: 26px; line-height: 1; padding: 0 10px 26px; }
+  .lado .marca span { display: block; font-weight: 600; font-size: 17px; color: var(--menta); }
+  .lado .menu { position: relative; }
+  .lado .sel { position: absolute; left: 0; right: 0; height: 52px; border-radius: 14px; background: var(--menta); }
+  .lado .op { position: relative; height: 52px; margin-bottom: 8px; border-radius: 14px; padding: 0 14px; display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 19px; }
+  .lado .op i { width: 18px; height: 18px; border-radius: 5px; border: 3px solid currentColor; }
+  .lado .op.off { opacity: .45; }
+  .pagina { position: absolute; left: 200px; right: 0; top: 0; bottom: 0; background: var(--cinza); padding: 26px 30px; }
+  .pagina.full { left: 0; padding: 0; z-index: 10; }
+  .pagina img.print { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .pagina .cab { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .pagina .cab b { font-weight: 800; font-size: 36px; letter-spacing: -1px; }
+  .pagina .novo { background: var(--lampada); border-radius: 12px; padding: 10px 18px; font-weight: 700; font-size: 18px; }
+  .kpis { display: flex; gap: 14px; margin-bottom: 16px; }
+  .kpi { flex: 1; background: var(--branco); border-radius: 16px; padding: 14px 18px; }
+  .kpi small { display: block; font-weight: 600; font-size: 15px; opacity: .6; }
+  .kpi b { display: block; font-weight: 800; font-size: 28px; letter-spacing: -.5px; }
+  .kpi.esc { background: var(--marinho); color: var(--branco); }
+  .kpi.esc small { color: var(--menta); opacity: 1; }
+  .tab { background: var(--branco); border-radius: 16px; padding: 6px 18px; }
+  .tab .ln { display: flex; align-items: center; gap: 14px; height: 60px; border-bottom: 2px solid var(--cinza); font-size: 18px; font-weight: 600; }
+  .tab .ln:last-child { border-bottom: 0; }
+  .tab .ln.h { height: 42px; font-size: 14px; font-weight: 700; opacity: .5; text-transform: uppercase; letter-spacing: 1px; }
+  .tab .av { flex: none; width: 38px; height: 38px; border-radius: 50%; background: var(--menta); font-weight: 800; font-size: 15px; display: flex; align-items: center; justify-content: center; }
+  .tab .c1 { flex: 1.6; } .tab .c2 { flex: 1.2; opacity: .65; font-weight: 500; } .tab .c3 { flex: 1; text-align: right; font-weight: 800; }
+  .chip { flex: none; font-weight: 700; font-size: 14px; padding: 5px 12px; border-radius: 10px; }
   .chip.ok { background: var(--menta); color: var(--marinho); }
   .chip.pend { background: var(--lampada); color: var(--marinho); }
   .chip.novo { background: var(--marinho); color: var(--branco); }
-  .app .valor { font-weight: 800; font-size: 26px; }
-  .app .saldo { margin: 24px 26px; background: var(--marinho); color: var(--branco); border-radius: 30px; padding: 28px; }
-  .app .saldo small { font-weight: 500; font-size: 20px; color: var(--menta); }
-  .app .saldo b { display: block; font-weight: 800; font-size: 52px; letter-spacing: -1px; }
-  .app .barras { display: flex; align-items: flex-end; gap: 14px; height: 140px; margin-top: 18px; }
-  .app .barras i { flex: 1; border-radius: 10px 10px 4px 4px; background: var(--menta); }
-  .app .barras i.c { background: var(--assinatura); }
-  .app .abas { position: absolute; left: 0; right: 0; bottom: 0; height: 104px; background: var(--branco); display: flex; justify-content: space-around; align-items: center; padding-bottom: 14px; }
-  .app .abas i { width: 64px; height: 12px; border-radius: 6px; background: var(--marinho); opacity: .2; }
-  .app .abas i.on { background: var(--assinatura); opacity: 1; }
+  .grafico { background: var(--branco); border-radius: 16px; padding: 18px 22px; }
+  .grafico small { font-weight: 700; font-size: 15px; opacity: .6; }
+  .barras { display: flex; align-items: flex-end; gap: 16px; height: 190px; margin-top: 12px; }
+  .barras div { flex: 1; display: flex; gap: 5px; align-items: flex-end; height: 100%; }
+  .barras i { flex: 1; border-radius: 6px 6px 2px 2px; background: var(--menta); }
+  .barras i.s { background: var(--marinho); opacity: .25; }
+  #cursor { position: absolute; left: 0; top: 0; width: 40px; height: 40px; z-index: 20; }
 
   /* ---------- Cena 5 ---------- */
   #c5 { opacity: 1; }
@@ -186,9 +201,26 @@
     <div id="grade"></div>
   </div>
 
-  <!-- Cena 4: celular -->
+  <!-- Cena 4: computador -->
   <div class="cena" id="c4">
-    <div id="celular"><div class="tela" id="tela"><div class="notch"></div></div></div>
+    <div id="pc">
+      <div class="monitor"><div class="cam"></div>
+        <div id="tela">
+          <div class="lado">
+            <div class="marca">GBR<span>Connect</span></div>
+            <div class="menu"><div class="sel" id="sel"></div>
+              <div class="op" id="op0"><i></i>Clientes</div>
+              <div class="op" id="op1"><i></i>Orçamentos</div>
+              <div class="op" id="op2"><i></i>Financeiro</div>
+              <div class="op off"><i></i>Agenda</div>
+              <div class="op off"><i></i>Relatórios</div>
+            </div>
+          </div>
+          <svg id="cursor" viewBox="0 0 40 40"><path d="M6 3l26 17-12 2 7 13-5 3-7-13-9 8z" fill="#FFFFFF" stroke="#071939" stroke-width="2.5" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <div class="base"></div>
+    </div>
   </div>
 
   <!-- Cena 5: chamada final -->
@@ -249,44 +281,41 @@ function montar(dados) {
     g.appendChild(c);
   }
 
-  // Telas do celular
-  const nomes = ['Clientes', 'Orçamentos', 'Financeiro'];
-  nomes.forEach((nome, i) => {
+  // Telas do computador (print-N.png ocupa a tela inteira, senão tela fictícia)
+  ['Clientes', 'Orçamentos', 'Financeiro'].forEach((nome, i) => {
     const a = document.createElement('div');
-    a.className = 'app'; a.id = 'app' + i;
+    a.className = 'pagina' + (D.prints[i] ? ' full' : ''); a.id = 'pg' + i;
     a.innerHTML = D.prints[i] ? `<img class="print" src="${D.prints[i]}">` : telaFicticia(i, nome);
-    $('tela').appendChild(a);
+    $('tela').insertBefore(a, $('cursor'));
   });
 }
 
 function telaFicticia(i, nome) {
-  const abas = [0, 1, 2].map(k => `<i class="${k === i ? 'on' : ''}"></i>`).join('');
+  const cab = (botao) => `<div class="cab"><b>${nome}</b><span class="novo">${botao}</span></div>`;
   if (i === 0) {
-    const cl = [['MS', 'Maria Souza', 'Última compra há 2 dias', 'ok', 'Ativa'], ['JP', 'João Pereira', 'Retornar hoje', 'pend', 'Retorno'],
+    const cl = [['MS', 'Maria Souza', '(11) 98765-4321', 'ok', 'Ativa'], ['JP', 'João Pereira', 'Retornar hoje', 'pend', 'Retorno'],
                 ['AL', 'Ana Lima', 'Cliente desde 2023', 'ok', 'Ativa'], ['RC', 'Rafael Costa', 'Pediu orçamento', 'novo', 'Novo'],
-                ['BF', 'Bia Fernandes', 'Aniversário amanhã', 'pend', 'Lembrar']];
-    return `<div class="topo"><small>GBR Connect</small><b>${nome}</b></div><div class="busca">Buscar cliente...</div>` +
-      cl.map(c => `<div class="item"><div class="av">${c[0]}</div><div class="nome">${c[1]}<small>${c[2]}</small></div><span class="chip ${c[3]}">${c[4]}</span></div>`).join('') +
-      `<div class="abas">${abas}</div>`;
+                ['BF', 'Bia Fernandes', 'Aniversário amanhã', 'pend', 'Lembrar'], ['CM', 'Carlos Melo', '(11) 91234-5678', 'ok', 'Ativo']];
+    return cab('+ Novo cliente') + `<div class="tab"><div class="ln h"><span class="c1">Cliente</span><span class="c2">Contato</span><span class="c3">Status</span></div>` +
+      cl.map(c => `<div class="ln"><span class="av">${c[0]}</span><span class="c1">${c[1]}</span><span class="c2">${c[2]}</span><span class="c3"><span class="chip ${c[3]}">${c[4]}</span></span></div>`).join('') + `</div>`;
   }
   if (i === 1) {
     const or = [['#0142', 'Maria Souza', 'R$ 1.250,00', 'ok', 'Aprovado'], ['#0143', 'Rafael Costa', 'R$ 3.480,00', 'pend', 'Pendente'],
-                ['#0144', 'João Pereira', 'R$ 890,00', 'novo', 'Enviado'], ['#0145', 'Ana Lima', 'R$ 2.100,00', 'ok', 'Aprovado'],
-                ['#0146', 'Bia Fernandes', 'R$ 640,00', 'pend', 'Pendente']];
-    return `<div class="topo"><small>GBR Connect</small><b>${nome}</b></div><div class="busca">+ Novo orçamento</div>` +
-      or.map(o => `<div class="item"><div class="nome">${o[1]}<small>${o[0]}</small></div><div style="text-align:right"><div class="valor">${o[2]}</div><span class="chip ${o[3]}">${o[4]}</span></div></div>`).join('') +
-      `<div class="abas">${abas}</div>`;
+                ['#0144', 'João Pereira', 'R$ 890,00', 'novo', 'Enviado'], ['#0145', 'Ana Lima', 'R$ 2.100,00', 'ok', 'Aprovado']];
+    return cab('+ Novo orçamento') +
+      `<div class="kpis"><div class="kpi"><small>Pendentes</small><b>4</b></div><div class="kpi"><small>Aprovados</small><b>12</b></div><div class="kpi esc"><small>Em aberto</small><b>R$ 18.900</b></div></div>` +
+      `<div class="tab">` + or.map(o => `<div class="ln"><span class="c2" style="flex:.6">${o[0]}</span><span class="c1">${o[1]}</span><span class="c3">${o[2]}</span><span class="chip ${o[3]}" style="width:100px;text-align:center">${o[4]}</span></div>`).join('') + `</div>`;
   }
-  const alt = [45, 62, 38, 70, 55, 82, 96];
-  return `<div class="topo"><small>GBR Connect</small><b>${nome}</b></div>` +
-    `<div class="saldo"><small>Lucro do mês</small><b>R$ 8.430,00</b><div class="barras">${alt.map((h, k) => `<i class="${k === 6 ? 'c' : ''}" style="height:${h}%"></i>`).join('')}</div></div>` +
-    `<div class="item"><div class="av">+</div><div class="nome">Recebido<small>Pedido #0142</small></div><div class="valor">R$ 1.250</div></div>` +
-    `<div class="item"><div class="av" style="background:#F1BE49">-</div><div class="nome">Fornecedor<small>Vence sexta</small></div><div class="valor">R$ 420</div></div>` +
-    `<div class="abas">${abas}</div>`;
+  const alt = [[45, 30], [62, 35], [38, 28], [70, 40], [55, 30], [82, 38], [96, 42]];
+  return cab('Exportar') +
+    `<div class="kpis"><div class="kpi"><small>Entradas</small><b>R$ 14.200</b></div><div class="kpi"><small>Saídas</small><b>R$ 5.770</b></div><div class="kpi esc"><small>Lucro do mês</small><b>R$ 8.430</b></div></div>` +
+    `<div class="grafico"><small>Entradas x saídas</small><div class="barras">${alt.map(h => `<div><i style="height:${h[0]}%"></i><i class="s" style="height:${h[1]}%"></i></div>`).join('')}</div></div>`;
 }
 
 // tempo da k-ésima palavra da frase fi
 const tp = (fi, k) => { const ws = P.filter(p => p.frase === fi); return ws[Math.min(k, ws.length - 1)].inicio; };
+// tempo da palavra (pelo texto) na frase fi; se não achar, usa o índice reserva
+const tw = (fi, palavra, reserva) => { const w = P.find(p => p.frase === fi && p.texto.toLowerCase().startsWith(palavra)); return w ? w.inicio : tp(fi, reserva); };
 
 // opacidade de uma cena: entra rápido no início da frase, sai rápido no início da próxima
 function visCena(t, i) {
@@ -312,17 +341,19 @@ function setTime(t) {
   c1.style.opacity = v1;
   const sx = Math.sin(t * 57) * 3.2 + Math.sin(t * 23) * 2.2, sy = Math.cos(t * 49) * 2.4, sr = Math.sin(t * 31) * 0.7;
   c1.querySelector('.titulo').style.transform = `translate(${sx}px,${sy}px) rotate(${sr}deg) translateY(${-60 * prog(t, T2, T2 + 0.12)}px)`;
-  const kc = prog(t, tp(0, 5) - 0.02, tp(0, 5) + 0.3);
+  const kc = prog(t, tw(0, 'caderno', 5) - 0.02, tw(0, 'caderno', 5) + 0.3);
   $('kcaderno').style.transform = `scale(${1 + 0.14 * Math.sin(Math.PI * kc)})`;
   $('caderno').style.transform = `rotate(${-8 + Math.sin(t * 9) * 4}deg) translateY(${Math.sin(t * 7) * 8}px)`;
 
   // ----- cena 2 -----
   const c2 = $('c2'); c2.style.opacity = visCena(t, 1);
-  [['l1', 0], ['l2', 2], ['l3', 4]].forEach(([id, k], n, arr) => {
-    const t0 = tp(1, k) - 0.06;
+  const entradas2 = [tw(1, 'cliente', 0), tw(1, 'orçamento', 2), tw(1, 'lucro', 99)];
+  if (!P.some(p => p.frase === 1 && p.texto.toLowerCase().startsWith('lucro'))) entradas2[2] = entradas2[1] + 0.55;
+  [['l1', 0], ['l2', 1], ['l3', 2]].forEach(([id, k], n, arr) => {
+    const t0 = entradas2[k] - 0.06;
     const e = prog(t, t0, t0 + 0.2);
     const x = (1 - eBack(e)) * 900;
-    const prox = n + 1 < arr.length ? tp(1, arr[n + 1][1]) - 0.06 : 1e9;
+    const prox = n + 1 < arr.length ? entradas2[arr[n + 1][1]] - 0.06 : 1e9;
     const apaga = n < 2 ? 1 - 0.45 * prog(t, prox, prox + 0.2) : 1;
     const el = $(id);
     el.style.transform = `translateX(${x}px)`;
@@ -333,7 +364,7 @@ function setTime(t) {
   const c3 = $('c3'); c3.style.opacity = visCena(t, 2);
   const tit3 = eOut(prog(t, T3, T3 + 0.25));
   c3.querySelector('.titulo').style.transform = `translateY(${(1 - tit3) * 50}px)`;
-  const alinhaIni = tp(2, 5) - 0.1, alinhaFim = alinhaIni + 0.7;   // "sistema" alinha tudo
+  const alinhaIni = tw(2, 'sistema', 5) - 0.1, alinhaFim = alinhaIni + 0.7;   // "sistema" alinha tudo
   const a = eInOut(prog(t, alinhaIni, alinhaFim));
   const cards = $('grade').children;
   const W = 230, H = 150, G = 28, gx = (1080 - (3 * W + 2 * G)) / 2, gy = 800;
@@ -355,19 +386,37 @@ function setTime(t) {
   m.style.width = 3 * W + 2 * G + 2 * pad + 'px'; m.style.height = 3 * H + 2 * G + 2 * pad + 'px';
   m.style.opacity = mo;
 
-  // ----- cena 4 -----
+  // ----- cena 4: computador -----
   const c4 = $('c4'); c4.style.opacity = visCena(t, 3);
-  const ent4 = eBack(prog(t, T4, T4 + 0.3));
-  $('celular').style.transform = `translateY(${(1 - ent4) * 500 + Math.sin(t * 2.4) * 10}px) rotate(${Math.sin(t * 1.7) * 1.5}deg)`;
-  const trocas = [T4 - 1, tp(3, 1) - 0.08, tp(3, 3) - 0.08];   // Clientes, orçamentos, financeiro
+  const ent4 = eBack(prog(t, T4, T4 + 0.32));
+  $('pc').style.transform = `translateY(${(1 - ent4) * 600 + Math.sin(t * 2.4) * 8}px) scale(${0.9 + 0.1 * ent4})`;
+  const trocas = [T4 - 1, tw(3, 'orçamento', 1) - 0.08, tw(3, 'financeiro', 3) - 0.08];   // Clientes, orçamentos, financeiro
+  let atual = 0;
   for (let i = 0; i < 3; i++) {
     const entra = i === 0 ? 1 : eOut(prog(t, trocas[i], trocas[i] + 0.22));
-    const sai = i < 2 ? eOut(prog(t, trocas[i + 1], trocas[i + 1] + 0.22)) : 0;
-    const el = $('app' + i);
-    el.style.transform = `translateX(${(1 - entra) * 100 - sai * 30}%)`;
-    el.style.zIndex = i;
-    el.style.filter = `brightness(${1 - sai * 0.4})`;
+    if (t >= trocas[i]) atual = i;
+    const el = $('pg' + i);
+    el.style.opacity = entra;
+    el.style.transform = `translateY(${(1 - entra) * 40}px)`;
+    el.style.zIndex = el.classList.contains('full') ? 10 + i : 1 + i;
+    $('op' + i).style.color = '';
   }
+  // destaque do menu desliza até o item clicado
+  let ySel = 0;
+  for (let i = 1; i < 3; i++) ySel += 60 * eOut(prog(t, trocas[i] - 0.04, trocas[i] + 0.16));
+  $('sel').style.transform = `translateY(${ySel}px)`;
+  for (let i = 0; i < 3; i++) $('op' + i).style.color = i === atual ? '#0C2B58' : '#FFFFFF';
+  // cursor: vai até o próximo item do menu e clica
+  const alvo = i => [150, $('op' + i).parentNode.offsetTop + $('op' + i).offsetTop + 18];
+  let [cx, cy] = [520, 420];
+  let clique = 0;
+  for (let i = 1; i < 3; i++) {
+    const m = eInOut(prog(t, trocas[i] - 0.45, trocas[i] - 0.06));
+    const de = i === 1 ? [520, 420] : alvo(1), para = alvo(i);
+    if (t >= trocas[i] - 0.45) { cx = de[0] + (para[0] - de[0]) * m; cy = de[1] + (para[1] - de[1]) * m; }
+    clique = Math.max(clique, Math.sin(Math.PI * prog(t, trocas[i] - 0.08, trocas[i] + 0.1)));
+  }
+  $('cursor').style.transform = `translate(${cx}px,${cy}px) scale(${1 - 0.2 * clique})`;
 
   // ----- cena 5 -----
   const c5 = $('c5');
