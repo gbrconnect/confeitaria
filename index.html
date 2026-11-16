@@ -732,7 +732,7 @@ const PAGES=[
  {id:'config',label:'Configurações',g:'Gestão'},
 ];
 let PAGE='painel';
-const UI={pedFiltro:'ativos',pedBusca:'',orcFiltro:'ativos',orcBusca:'',siteBusca:'',agDias:14,compDias:7,compInclAg:true,prodCat:'Todos',prodBusca:'',insBusca:'',insCat:'Todos',cliBusca:'',finMes:null,finTab:'resumo',relPer:'mes',simIns:'i4',simPct:15};
+const UI={pedFiltro:'ativos',pedBusca:'',orcFiltro:'ativos',orcBusca:'',siteBusca:'',agDias:14,compDias:7,compInclAg:true,prodCat:'Todos',prodBusca:'',insBusca:'',insCat:'Todos',cliBusca:'',finMes:null,finTab:'conferir',relPer:'mes',simIns:'i4',simPct:15};
 
 function badges(){
  const al=alertas();
@@ -1292,11 +1292,18 @@ function verPedido(id){
 }
 function mudarStatus(id,st,forcar){
  const p=S.pedidos.find(x=>x.id===id);const t=totaisDoc(p);
- if(st==='entregue'&&t.saldo>0.009&&!forcar){return askConfirm(`Ainda falta receber ${brl(t.saldo)} deste pedido.`,'Receber saldo e entregar',()=>{p.pagamentos.push({data:hoje(),valor:t.saldo,forma:'Pix',tipo:'Saldo'});mudarStatus(id,st,true)},'Entregar sem receber',()=>mudarStatus(id,st,true))}
- if(st==='confirmado'&&t.pago<0.01&&!forcar){return askConfirm(`Nenhum sinal registrado. Registrar o sinal de ${CFG().sinalPct}% (${brl(t.total*CFG().sinalPct/100)}) agora?`,'Registrar sinal e confirmar',()=>{p.pagamentos.push({data:hoje(),valor:+(t.total*CFG().sinalPct/100).toFixed(2),forma:'Pix',tipo:'Sinal'});mudarStatus(id,st,true)},'Confirmar sem sinal',()=>mudarStatus(id,st,true))}
+ if(st==='entregue'&&t.saldo>0.009&&!forcar)return perguntaPag(id,st,+t.saldo.toFixed(2),'Saldo',`Falta receber ${brl(t.saldo)} deste pedido. A cliente já te pagou?`,'Ainda não, entregar mesmo assim');
+ if(st==='confirmado'&&t.pago<0.01&&!forcar)return perguntaPag(id,st,+(t.total*CFG().sinalPct/100).toFixed(2),'Sinal',`O sinal deste pedido é ${brl(t.total*CFG().sinalPct/100)}. A cliente já te pagou?`,'Ainda não recebi, confirmar mesmo assim');
  if(['producao','pronto','entregue'].includes(st)&&!p.baixado){baixaEstoque(p,-1);p.baixado=true}
  p.status=st;save();toast(`Pedido #${p.num}: ${(frenteDe(p)==='estacao'?STE:STP)[st].toLowerCase()}`);closeModal();render();const q=_q;_q=false;if(st!=='entregue'&&!q)verPedido(id);
 }
+let _pg=null;
+function perguntaPag(id,st,valor,tipo,msg,semTxt){_pg={id,st,tipo};
+ openModal('Ela já pagou?',`<p style="margin:0 0 12px;font-size:15px">${esc(msg)}</p><label class="f">Valor recebido (R$)<input type="text" inputmode="decimal" id="pg-v" value="${n2(valor)}"></label><div class="small muted" style="margin:10px 0 6px">Toque em como você recebeu. Só registre se o dinheiro já caiu.</div>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${['Pix','Dinheiro','Débito','Crédito'].map(f=>`<button class="btn" style="justify-content:center" onclick="pagRecebido('${f}')">${f}</button>`).join('')}</div>`,
+ `<button class="btn" onclick="pagNao()">${esc(semTxt)}</button>`)}
+function pagRecebido(f){const p=S.pedidos.find(x=>x.id===_pg.id);const v=num($('#pg-v').value);if(!(v>0))return toast('Informe o valor recebido.','bad');p.pagamentos.push({data:hoje(),valor:+v.toFixed(2),forma:f,tipo:_pg.tipo});mudarStatus(_pg.id,_pg.st,true)}
+function pagNao(){mudarStatus(_pg.id,_pg.st,true)}
 function baixaEstoque(p,sinal){const acc={};for(const x of p.itens)necessidade(x.p,x.q,acc);for(const[id,q]of Object.entries(acc)){const i=getIns(id);if(i)i.estoque=+(i.estoque+sinal*q).toFixed(3)}}
 function cancelarPedido(id){askConfirm('Cancelar este pedido? Se os insumos já tinham sido baixados, eles voltam para o estoque.','Cancelar pedido',()=>{const p=S.pedidos.find(x=>x.id===id);if(p.baixado){baixaEstoque(p,1);p.baixado=false}p.status='cancelado';save();closeModal();render();toast('Pedido cancelado')},'Voltar')}
 function excluirPedido(id){askConfirm('Excluir definitivamente este pedido?','Excluir',()=>{S.pedidos=S.pedidos.filter(x=>x.id!==id);save();closeModal();render();toast('Pedido excluído')},'Voltar')}
@@ -1863,9 +1870,27 @@ R.financeiro=()=>{
  const inn=cx.filter(x=>x.tipo==='entrada').reduce((s,x)=>s+x.valor,0),out=cx.filter(x=>x.tipo==='saida').reduce((s,x)=>s+x.valor,0);
  const receber=S.pedidos.filter(p=>p.status!=='cancelado'&&totaisDoc(p).saldo>0.009).sort((a,b)=>a.dataEntrega.localeCompare(b.dataEntrega));
  const an=modOn('analise');if(!an&&UI.finTab==='resumo')UI.finTab='caixa';const rf=recFrente(k);const aRec=receber.reduce((s,p)=>s+totaisDoc(p).saldo,0);
- const tabs=[...(an?[['resumo','Resultado do mês']]:[]),['caixa','Entradas e saídas'],['receber',`A receber (${receber.length})`],...(temRepasse()?[['repasse','Repasses']]:[])];const rpm=repasses(k+'-01',k+'-31');const rpTot=Object.values(rpm).reduce((s,x)=>s+x.vend,0);
+ const tabs=[['conferir','Conferir meu dinheiro'],...(an?[['resumo','Resultado do mês']]:[]),['caixa','Entradas e saídas'],['receber',`A receber (${receber.length})`],...(temRepasse()?[['repasse','Repasses']]:[])];const rpm=repasses(k+'-01',k+'-31');const rpTot=Object.values(rpm).reduce((s,x)=>s+x.vend,0);
  let body='';
- if(UI.finTab==='resumo'){const r=v=>d.rec>0?`<span class="small muted" style="margin-left:8px">${pct(v/d.rec)}</span>`:'';
+ if(UI.finTab==='conferir'){
+  const ent=cx.filter(x=>x.tipo==='entrada');const fm={Pix:0,Dinheiro:0,'Cartão':0,Outros:0};
+  ent.forEach(x=>{const t=(x.forma||x.desc||'');const k=/pix/i.test(t)?'Pix':/dinheiro/i.test(t)?'Dinheiro':/d[ée]bito|cr[ée]dito|cart/i.test(t)?'Cartão':'Outros';fm[k]+=x.valor});
+  const sd=cx.filter(x=>x.tipo==='saida');const pe=sd.filter(x=>x.cat===PESSOAL).reduce((a,x)=>a+x.valor,0);const sc=sd.reduce((a,x)=>a+x.valor,0)-pe;
+  const sobra=inn-out;const ini=+UI.cfIni||0,agora=UI.cfAgora===''||UI.cfAgora==null?null:+UI.cfAgora;const dif=agora==null?null:(ini+sobra)-agora;
+  const sinaisFut=S.pedidos.filter(p=>!['entregue','cancelado'].includes(p.status)).reduce((a,p)=>a+(p.pagamentos||[]).reduce((b,g)=>b+g.valor,0),0);
+  const lin=(l,v,c='')=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line)"><span>${l}</span><b class="num ${c}">${v}</b></div>`;
+  body=`<div class="grid g2"><div class="card"><h3>Dinheiro de ${mesLabel(k)}</h3>
+   <div style="font-weight:700;margin:6px 0 2px">Entrou</div>${lin('Pix',brl(fm.Pix))}${lin('Dinheiro na mão',brl(fm.Dinheiro))}${lin('Cartão (maquininha)',brl(fm['Cartão']))}${fm.Outros?lin('Outros',brl(fm.Outros)):''}${lin('<b>Total que entrou</b>',brl(inn),'up')}
+   <div style="font-weight:700;margin:14px 0 2px">Saiu (o que foi lançado)</div>${lin('Gastos da confeitaria',brl(sc))}${lin('Gastos pessoais',brl(pe))}${lin('<b>Total que saiu</b>',brl(out),'down')}
+   <div style="margin-top:14px;padding:12px;border-radius:12px;background:var(--gold-soft)"><div class="small muted">Pelo que está lançado, deveria ter sobrado</div><div style="font-size:26px;font-weight:800" class="num">${brl(sobra)}</div></div>
+   <p class="small muted" style="margin:10px 0 0">Só entra aqui o que foi registrado no app: pagamentos dos pedidos, vendas do carrinho e despesas lançadas.</p></div>
+  <div class="card"><h3>Conferir com o que você tem</h3>
+   <p class="small muted" style="margin:0 0 10px">Olhe o saldo do banco e o dinheiro guardado e digite abaixo. O app mostra se está faltando dinheiro.</p>
+   <label class="f">Quanto tinha no começo do mês (banco + dinheiro)<input type="text" inputmode="decimal" value="${UI.cfIni?n2(UI.cfIni):''}" placeholder="0,00" onchange="UI.cfIni=num(this.value);render()"></label>
+   <label class="f">Quanto tem agora (banco + dinheiro)<input type="text" inputmode="decimal" value="${agora!=null?n2(agora):''}" placeholder="0,00" onchange="UI.cfAgora=this.value.trim()===''?'':num(this.value);render()"></label>
+   ${dif==null?'<div class="empty" style="margin-top:10px">Preencha quanto tem agora para conferir.</div>':Math.abs(dif)<1?`<div style="margin-top:12px;padding:12px;border-radius:12px;background:var(--ok-soft)"><b class="up">Tudo certo!</b> O dinheiro bate com o que está lançado.</div>`:dif>0?`<div style="margin-top:12px;padding:12px;border-radius:12px;background:var(--bad-soft)"><div class="small">Saiu sem estar lançado</div><div style="font-size:24px;font-weight:800" class="num down">${brl(dif)}</div><div class="small" style="margin-top:6px">Normalmente é: gasto pessoal pago com o dinheiro da confeitaria, compra esquecida, fatura do cartão ou um pagamento marcado como recebido que não caiu. Lance o que lembrar em "Entradas e saídas".</div></div>`:`<div style="margin-top:12px;padding:12px;border-radius:12px;background:var(--ok-soft)"><div class="small">Tem a mais do que o lançado</div><div style="font-size:24px;font-weight:800" class="num up">${brl(-dif)}</div><div class="small" style="margin-top:6px">Pode ser uma venda ou pagamento que não foi registrado no app.</div></div>`}
+   ${sinaisFut>0?`<div style="margin-top:14px" class="small"><b>Atenção:</b> ${brl(sinaisFut)} desse dinheiro são sinais de encomendas que ainda não foram entregues. Esse valor já está com você, mas vai ser usado para fazer esses pedidos.</div>`:''}</div></div>`}
+ else if(UI.finTab==='resumo'){const r=v=>d.rec>0?`<span class="small muted" style="margin-left:8px">${pct(v/d.rec)}</span>`:'';
   body=`<div class="grid g21"><div class="card"><h3>Resultado de ${mesLabel(k)}</h3><table class="dre">
   <tr><td>Receita de vendas</td><td><b>${brl(d.rec)}</b></td></tr>
   <tr class="sub"><td>Encomendas</td><td>${brl(d.recEnc-d.recEst)}</td></tr>
