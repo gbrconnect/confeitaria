@@ -462,6 +462,7 @@ function lerImagem(inp,opt,cb){
 
 /* ============ ícones ============ */
 const IC={
+ natal:'<path d="M12 2l3 5h-2l3 5h-2l3 5H7l3-5H8l3-5H9z"/><path d="M12 17v4"/>',
  painel:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
  orcamentos:'<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/>',
  pedidos:'<path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
@@ -713,6 +714,7 @@ function chipsFrente(key){const v=UI[key]||'tudo';return`<div class="chips" styl
 /* ============ navegação ============ */
 const PAGES=[
  {id:'painel',label:'Início',g:'Operação'},
+ {id:'natal',label:'Natal',g:'Operação'},
  {id:'carrinho',label:'Carrinho',g:'Operação'},
  {id:'estacao',label:'Estação Gourmet',g:'Operação'},
  {id:'pedidos',label:'Encomendas',g:'Operação'},
@@ -826,7 +828,7 @@ async function carregarSlug(){SLUG_SITE='';if(!NUVEM||!LOJA)return;try{const r=a
 const siteNovos=()=>SITE.filter(x=>x.status==='novo');
 function siteBanner(){const n=siteNovos().length;return n?`<div class="car-banner" style="margin-bottom:12px"><div><div class="t">${n} pedido${n>1?'s':''} novo${n>1?'s':''} pelo site</div><div class="s">Abra para aceitar ou recusar. Ao aceitar, ele entra na agenda.</div></div><button class="btn" onclick="go('online')">${ico('online')}Ver pedidos</button></div>`:''}
 function vitrineDados(){const c=CFG();
- const ps=S.produtos.filter(p=>p.ativo!==false).map(p=>{const fs=frentesDe(p);if(fs.length&&!fs.includes('encomenda')&&!fs.includes('estacao'))return null;const tipo=fs.includes('estacao')&&!fs.includes('encomenda')?'estacao':'encomenda';if(tipo==='estacao'?p.catalogo===false:!noCatalogo(p))return null;return{id:p.id,nome:p.nome,desc:p.desc||'',preco:+p.preco||0,foto:p.foto||'',cat:p.cat||'',grupo:p.grupo||'',rotulo:p.precoRotulo||'',cob:'',fx:[],mp:+p.minPes||0,tipo,min:Math.max(0,Math.round(+p.minimo||0))}}).filter(Boolean);
+ const ps=S.produtos.filter(p=>p.ativo!==false).map(p=>{const fs=frentesDe(p);if(fs.length&&!fs.includes('encomenda')&&!fs.includes('estacao'))return null;const tipo=fs.includes('estacao')&&!fs.includes('encomenda')?'estacao':'encomenda';if(tipo==='estacao'?p.catalogo===false:!noCatalogo(p))return null;if(p.natal&&!c.natalSite)return null;return{id:p.id,nome:p.nome,desc:p.desc||'',preco:+p.preco||0,foto:p.foto||'',cat:p.natal?'Natal':(p.cat||''),grupo:p.natal?'':(p.grupo||''),natal:!!p.natal,rotulo:p.precoRotulo||'',cob:'',fx:[],mp:+p.minPes||0,tipo,min:Math.max(0,Math.round(+p.minimo||0))}}).filter(Boolean).sort((a,b)=>(b.natal?1:0)-(a.natal?1:0));
  return{marca:c.marca||c.empresa||'',sub:c.marcaSub??'CONFEITARIA',logo:c.logo||'',whatsapp:c.whatsapp||'',instagram:c.instagram||'',aviso:c.avisoSite??AVISO_SITE,sinal:+c.sinalPct||50,produtos:ps}}
 async function publicarVitrine(){if(!NUVEM||!LOJA||!SITE_OK||!SLUG_SITE)return;const d=vitrineDados(),t=canon(d);if(t===_vit)return;try{const r=await sb.from('vitrine').upsert([{loja_id:LOJA,slug:SLUG_SITE,dados:d,atualizado_em:new Date().toISOString()}]);if(!r.error)_vit=t}catch(e){}}
 async function carregarSite(){if(!NUVEM||!LOJA)return;try{const r=await sb.from('pedidos_site').select('id,criado_em,status,dados').eq('loja_id',LOJA).order('criado_em',{ascending:false}).limit(60);if(r.error)return;const era=SITE_OK;SITE_OK=true;const a=canon(SITE.map(x=>[x.id,x.status]));SITE=r.data||[];if(!era||canon(SITE.map(x=>[x.id,x.status]))!==a){if($('#modal-root').innerHTML)_remoto=true;else render()}}catch(e){}}
@@ -1230,6 +1232,30 @@ function precosEstacao(){
   ${inc.length?`<div class="cb-s">Incluso</div><ul class="cb-l">${inc.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
   ${ad.length?`<div class="cb-s">Adicionais</div><table class="cb-t">${ad.map(a=>`<tr><td>${esc(a.nome)}</td><td>${brl(a.preco)}</td></tr>`).join('')}</table>`:''}</div>`}).join('')+'</div>'}
 R.pedidos=()=>pedidosView('encomenda');
+/* ============ NATAL ============ */
+function natalIds(){return new Set(S.produtos.filter(p=>p.natal).map(p=>p.id))}
+function novoNatal(){abrirProduto();EP.natal=true;const n=$('#pr-natal');if(n)n.checked=true;const c=$('#pr-cat');if(c)c.value='Natal';Object.keys(FRENTES).forEach(k=>{const e=$('#pr-fr-'+k);if(e)e.checked=k==='encomenda'})}
+function natalSite(v){CFG().natalSite=v;save();render();toast(v?'Cardápio de Natal aparecendo na página de pedidos.':'Cardápio de Natal escondido da página de pedidos.')}
+R.natal=()=>{
+ const ps=S.produtos.filter(p=>p.natal&&p.ativo!==false);const ids=natalIds();const ano=hoje().slice(0,4);
+ const peds=S.pedidos.filter(p=>p.status!=='cancelado'&&p.dataEntrega>=ano+'-11-01'&&p.dataEntrega<=ano+'-12-31'&&p.itens.some(x=>ids.has(x.p))).sort((a,b)=>a.dataEntrega.localeCompare(b.dataEntrega));
+ let fat=0,cus=0;const vend={};
+ const soma=(pid,q,v)=>{const c=custoProduto(getProd(pid)).total;fat+=q*v;cus+=q*c;vend[pid]=(vend[pid]||0)+q};
+ peds.forEach(p=>p.itens.forEach(x=>{if(ids.has(x.p))soma(x.p,x.q,x.v)}));
+ (S.carrinhos||[]).forEach(k=>(k.vendas||[]).forEach(v=>{if(v.data>=ano+'-11-01'&&v.data<=ano+'-12-31')(v.itens||[]).forEach(it=>{if(ids.has(it.p))soma(it.p,it.q,it.v)})}));
+ const pend=peds.filter(p=>!['entregue','cancelado'].includes(p.status));const plano={};
+ pend.forEach(p=>p.itens.forEach(x=>{if(!ids.has(x.p))return;(plano[p.dataEntrega]=plano[p.dataEntrega]||{})[x.p]=((plano[p.dataEntrega]||{})[x.p]||0)+x.q}));
+ const on=!!CFG().natalSite;
+ return head('Natal','Tudo da campanha de Natal num lugar só: produtos, encomendas, o que produzir e quanto está rendendo.',`<button class="btn pri" onclick="novoNatal()">${ico('plus')}Novo produto de Natal</button>`)
+ +`<div class="card" style="margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap"><label class="chk" style="font-size:15px"><input type="checkbox" ${on?'checked':''} onchange="natalSite(this.checked)"> <b>Mostrar o cardápio de Natal na página de pedidos</b></label><span class="small muted">${on?'Os produtos de Natal aparecem em destaque, no topo da página.':'Desligado: as clientes ainda não veem os produtos de Natal.'}</span></div>
+ <div class="grid g3" style="margin-bottom:16px">
+  <div class="card kpi"><div class="l">Vendido no Natal</div><div class="v num">${brl(fat)}</div><div class="d">Encomendas e carrinho (nov e dez)</div></div>
+  <div class="card kpi"><div class="l">Lucro bruto</div><div class="v num up">${brl(fat-cus)}</div><div class="d">${fat>0?'Margem de '+pct((fat-cus)/fat):'Venda menos custo dos produtos'}</div></div>
+  <div class="card kpi"><div class="l">Encomendas de Natal</div><div class="v num">${peds.length}</div><div class="d">${pend.length} para entregar</div></div></div>
+ <div class="card" style="margin-bottom:16px"><h3>Produtos de Natal</h3>${ps.length?`<div class="tbl-wrap"><table><thead><tr><th>Produto</th><th class="r">Preço</th><th class="r">Custo</th><th class="r">Margem</th><th class="r">Vendidos</th><th></th></tr></thead><tbody>${ps.map(p=>{const c=custoProduto(p).total;const m=+p.preco>0?(p.preco-c)/p.preco:0;return`<tr class="click" onclick="abrirProduto('${p.id}')"><td><b>${esc(p.nome)}</b>${p.desc?`<div class="small muted">${esc(p.desc)}</div>`:''}</td><td class="r num">${brl(p.preco)}</td><td class="r num">${c>0?brl(c):'<span class="muted">sem custo</span>'}</td><td class="r">${c>0?mgChip(m):'-'}</td><td class="r num">${nq(vend[p.id]||0)}</td><td class="r"><button class="btn sm">Editar</button></td></tr>`}).join('')}</tbody></table></div>`:`<div class="empty">Nenhum produto de Natal ainda. Toque em <b>Novo produto de Natal</b>, ou marque "Produto de Natal" em um produto que já existe.</div>`}</div>
+ <div class="grid g2">
+  <div class="card"><h3>O que produzir</h3>${Object.keys(plano).length?Object.keys(plano).sort().map(d=>`<div style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:4px">${SEMLONGO[toDate(d).getDay()]}, ${dBR(d)}</div>${Object.entries(plano[d]).map(([pid,q])=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--line)"><span>${esc((getProd(pid)||{}).nome||'?')}</span><b class="num">${nq(q)}</b></div>`).join('')}</div>`).join(''):'<div class="empty">Nenhuma encomenda de Natal para produzir.</div>'}</div>
+  <div class="card"><h3>Encomendas de Natal</h3>${peds.length?`<div class="list">${peds.map(p=>itemPedido(p)).join('')}</div>`:'<div class="empty">As encomendas com produtos de Natal aparecem aqui.</div>'}</div></div>`};
 R.estacao=()=>pedidosView('estacao');
 function rerenderKeep(id){const el=document.getElementById(id);const pos=el?el.selectionStart:0;render();const n=document.getElementById(id);if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(e){}}}
 
@@ -1672,6 +1698,7 @@ function abrirProduto(id){
  <label class="f" id="pr-parc-w" ${EP.repasse?'':'hidden'} style="margin-top:8px">Repassar para<input type="text" id="pr-parc" list="pr-parcs" value="${esc(EP.parceiro||'')}" placeholder="Nome de quem produz"><datalist id="pr-parcs">${[...new Set(S.produtos.map(p=>p.parceiro).filter(Boolean))].map(n=>`<option value="${esc(n)}">`).join('')}</datalist><small>As vendas deste produto ficam fora do faturamento e da margem, e aparecem em Financeiro, na aba Repasses. O custo informado abaixo é ignorado.</small></label>
  <div class="sec">Vende em</div>
  <div style="display:flex;gap:16px;flex-wrap:wrap">${Object.entries(FRENTES).map(([k,l])=>`<label class="chk"><input type="checkbox" id="pr-fr-${k}" ${(EP.nome?frentesDe(EP):(EP.frentes||[])).includes(k)?'checked':''}> ${l}</label>`).join('')}</div>
+ <label class="chk" style="margin-top:8px"><input type="checkbox" id="pr-natal" ${EP.natal?'checked':''}> Produto de Natal (aparece na área Natal)</label>
  <div class="small muted" style="margin-top:4px">Marque onde este produto ou serviço é vendido. Ele só aparece nas frentes marcadas. Sem nenhuma marcada, o sistema decide pela categoria.</div>
  <div class="sec">Como informar o custo</div>
  <div class="tabs" style="margin-bottom:0"><button id="pr-m-manual" class="${man?'on':''}" onclick="prModo('manual')">Custo manual</button><button id="pr-m-ficha" class="${man?'':'on'}" ${modOn('ficha')||!man?'':'hidden'} onclick="prModo('ficha')">Ficha técnica</button></div>
@@ -1709,7 +1736,7 @@ function prUpd(){
 }
 function prSalvar(){
  const nome=$('#pr-nome').value.trim();if(!nome)return toast('Informe o nome do produto.','bad');
- Object.assign(EP,{nome,cat:$('#pr-cat').value.trim()||'Outros',contaCap:$('#pr-cap').checked,ativo:$('#pr-ativo').checked,catalogo:$('#pr-catalogo').checked,frentes:Object.keys(FRENTES).filter(k=>$('#pr-fr-'+k).checked),minimo:Math.max(0,Math.round(num($('#pr-min').value)))||0,repasse:$('#pr-rep').checked,parceiro:$('#pr-rep').checked?($('#pr-parc').value.trim()||'Parceiro'):'',desc:$('#pr-desc').value.trim(),grupo:$('#pr-grupo').value.trim(),precoRotulo:$('#pr-rotulo').value.trim(),cobranca:$('#pr-cob').value,faixasTxt:$('#pr-faixas').value.trim(),minPes:Math.max(0,Math.round(+$('#pr-minpes').value||0)),inclusos:$('#pr-incl').value.trim(),adDe:$('#pr-adde').value});
+ Object.assign(EP,{nome,cat:$('#pr-cat').value.trim()||'Outros',contaCap:$('#pr-cap').checked,ativo:$('#pr-ativo').checked,catalogo:$('#pr-catalogo').checked,frentes:Object.keys(FRENTES).filter(k=>$('#pr-fr-'+k).checked),minimo:Math.max(0,Math.round(num($('#pr-min').value)))||0,repasse:$('#pr-rep').checked,parceiro:$('#pr-rep').checked?($('#pr-parc').value.trim()||'Parceiro'):'',desc:$('#pr-desc').value.trim(),grupo:$('#pr-grupo').value.trim(),precoRotulo:$('#pr-rotulo').value.trim(),cobranca:$('#pr-cob').value,faixasTxt:$('#pr-faixas').value.trim(),minPes:Math.max(0,Math.round(+$('#pr-minpes').value||0)),inclusos:$('#pr-incl').value.trim(),adDe:$('#pr-adde').value,natal:$('#pr-natal').checked});
  if(!EP.id){EP.id=uid('p');S.produtos.push(EP)}else{S.produtos[S.produtos.findIndex(p=>p.id===EP.id)]=EP}
  save();closeModal();render();toast('Produto salvo');
 }
@@ -1811,16 +1838,18 @@ function clSalvar(id){const nome=$('#cl-nome').value.trim();if(!nome)return toas
 function excluirCliente(id){if(S.pedidos.some(p=>p.cliente===id)||S.orcamentos.some(o=>o.cliente===id))return toast('Essa cliente tem pedidos ou orçamentos e não pode ser excluída.','bad');askConfirm('Excluir esta cliente?','Excluir',()=>{S.clientes=S.clientes.filter(c=>c.id!==id);save();closeModal();render()},'Voltar')}
 
 /* ============ FINANCEIRO ============ */
-const CATS_SAIDA=['Insumos','Embalagens','Despesas fixas','Impostos','Marketing','Equipamentos','Pró-labore','Outros'];
+const CATS_SAIDA=['Insumos','Embalagens','Despesas fixas','Impostos','Marketing','Equipamentos','Pró-labore','Outros','Gastos pessoais'];
+const PESSOAL='Gastos pessoais';
 function dreMes(k){
  const ent=S.pedidos.filter(p=>p.status==='entregue'&&p.dataEntrega.slice(0,7)===k);let rec=0,mat=0,mo=0,recEst=0;
  for(const p of ent){const t=totaisDoc(p);rec+=t.rec;mat+=t.mat;mo+=t.mo;if(frenteDe(p)==='estacao')recEst+=t.rec}
  const ck=carrinhoMes(k);const recEnc=rec;rec+=ck.rec;mat+=ck.mat;mo+=ck.mo;
  const imp=rec*CFG().imposto/100,tx=ent.reduce((s,p)=>s+taxasVendas(p.pagamentos||[]),0)+taxasVendas(vendasCarrinhoPeriodo(k+'-01',k+'-31').map(x=>x.v));const mc=rec-imp-tx-mat;
- const desp=S.lancamentos.filter(l=>l.tipo==='saida'&&l.data.slice(0,7)===k&&!['Insumos','Embalagens','Repasse'].includes(l.cat));
+ const desp=S.lancamentos.filter(l=>l.tipo==='saida'&&l.data.slice(0,7)===k&&!['Insumos','Embalagens','Repasse',PESSOAL].includes(l.cat));
+ const pess=S.lancamentos.filter(l=>l.tipo==='saida'&&l.data.slice(0,7)===k&&l.cat===PESSOAL).reduce((s,l)=>s+l.valor,0);
  const pl=desp.filter(l=>l.cat==='Pró-labore').reduce((s,l)=>s+l.valor,0);const dsp=desp.reduce((s,l)=>s+l.valor,0)-pl;
  const mcp=rec>0?mc/rec:0;const pe=mcp>0?(dsp+pl)/mcp:null;
- return{n:ent.length,recEnc,recEst,recCar:ck.rec,rec,imp,tx,mat,mc,dsp,pl,res:mc-dsp,mo,final:mc-dsp-pl-mo,desp,mcp,pe};
+ return{n:ent.length,recEnc,recEst,recCar:ck.rec,rec,imp,tx,mat,mc,dsp,pl,res:mc-dsp,mo,final:mc-dsp-pl-mo,desp,mcp,pe,pess};
 }
 function caixaMes(k){
  const ent=[];for(const p of S.pedidos)for(const g of p.pagamentos||[])if(g.data.slice(0,7)===k)ent.push({data:g.data,desc:`Pedido #${p.num} · ${nomeCli(p.cliente)} (${g.tipo.toLowerCase()}, ${g.forma})`,valor:g.valor,tipo:'entrada',cat:'Vendas'});
@@ -1850,10 +1879,14 @@ R.financeiro=()=>{
   <tr class="tot"><td>Resultado antes do pró-labore</td><td>${brl(d.res)}${r(d.res)}</td></tr>
   <tr class="sub"><td>(-) Pró-labore (retirada da dona)</td><td>${brl(-d.pl)}</td></tr>
   ${d.mo>0?`<tr class="sub"><td>(-) Mão de obra pelas horas trabalhadas (${brl(CFG().custoHora)}/h)</td><td>${brl(-d.mo)}</td></tr>`:''}
-  <tr class="tot"><td>Lucro da confeitaria</td><td>${brl(d.final)}${r(d.final)}</td></tr></table>
-  <p class="small muted" style="margin:12px 0 0">Compras de insumos e embalagens aparecem em Entradas e saídas. No resultado, entra o custo do que foi efetivamente vendido, pela ficha técnica.</p></div>
+  <tr class="tot"><td>Lucro da confeitaria</td><td>${brl(d.final)}${r(d.final)}</td></tr>
+  ${d.pess>0?`<tr><td colspan="2" style="padding-top:14px;text-align:left"><b>Fora da confeitaria</b></td></tr>
+  <tr class="sub"><td>(-) Gastos pessoais do dia a dia</td><td>${brl(-d.pess)}</td></tr>
+  <tr class="tot"><td>O que sobra depois dos gastos pessoais</td><td>${brl(d.final-d.pess)}</td></tr>`:''}</table>
+  <p class="small muted" style="margin:12px 0 0">Gastos lançados na categoria "Gastos pessoais" (casa, contas pessoais) não entram no lucro da confeitaria: aparecem separados, embaixo. Compras de insumos e embalagens aparecem em Entradas e saídas. No resultado, entra o custo do que foi efetivamente vendido, pela ficha técnica.</p></div>
   <div class="grid" style="align-content:start"><div class="card kpi"><div class="l">Ponto de equilíbrio do mês</div><div class="v num">${d.pe!=null?brl(d.pe):'sem dados'}</div><div class="d">${d.pe==null?'Aparece quando houver vendas e despesas lançadas no mês.':d.rec>=d.pe?`<span class="up">Já passou em ${brl(d.rec-d.pe)}</span>. A partir daqui, cada venda vira lucro.`:`<span class="down">Faltam ${brl(d.pe-d.rec)} em vendas</span> para pagar as despesas e o pró-labore.`}</div></div><div class="card kpi"><div class="l">Recebido no mês</div><div class="v num up">${brl(inn)}</div></div><div class="card kpi"><div class="l">Pago no mês</div><div class="v num down">${brl(out)}</div></div><div class="card kpi"><div class="l">Saldo do caixa no mês</div><div class="v num">${brl(inn-out)}</div></div></div></div>`}
  else if(UI.finTab==='caixa'){body=`<div class="toolbar"><button class="btn pri" onclick="novoLanc()">${ico('plus')}Lançar despesa ou entrada</button><button class="btn" onclick="recorrentes()">Despesas fixas${(CFG().recorrentes||[]).length?` (${CFG().recorrentes.length})`:''}</button><span class="muted small">Pagamentos de pedidos entram automaticamente. Clique duas vezes em uma linha de carrinho para ver a conciliação.</span></div>
+  ${(()=>{const sd=cx.filter(x=>x.tipo==='saida');const pe=sd.filter(x=>x.cat===PESSOAL).reduce((a,x)=>a+x.valor,0);const em=sd.reduce((a,x)=>a+x.valor,0)-pe;return`<div class="grid g3" style="margin-bottom:14px"><div class="card kpi"><div class="l">Gastos da confeitaria</div><div class="v num down">${brl(em)}</div><div class="d">Ingredientes, embalagens, contas e despesas do negócio</div></div><div class="card kpi"><div class="l">Gastos pessoais do dia a dia</div><div class="v num down">${brl(pe)}</div><div class="d">Lançados como "Gastos pessoais"</div></div><div class="card kpi"><div class="l">Total que saiu no mês</div><div class="v num">${brl(em+pe)}</div></div></div>`})()}
   ${cx.length?`<div class="tbl-wrap"><table><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th class="r">Valor</th><th></th></tr></thead><tbody>${cx.map(x=>`<tr ${x.car?`class="click" title="Clique duas vezes para ver a conciliação" ondblclick="verCarrinho('${x.car}')"`:''}><td class="num">${dCurto(x.data)}</td><td>${esc(x.desc)}${x.car?` <button class="btn sm ghost" style="padding:2px 8px" onclick="verCarrinho('${x.car}')">ver</button>`:''}</td><td class="small muted">${esc(x.cat)}</td><td class="r ${x.tipo==='entrada'?'up':'down'}">${x.tipo==='entrada'?'':'- '}${brl(x.valor)}</td><td>${x.id?`<button class="x" title="Excluir lançamento" onclick="delLanc('${x.id}')">${ico('x','width="16" height="16"')}</button>`:''}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">Nenhuma movimentação neste mês.</div>'}`}
  else if(UI.finTab==='repasse'){body=repassesView(k,rpm)}
  else{body=receber.length?`<div class="tbl-wrap"><table><thead><tr><th>Pedido</th><th>Entrega</th><th>Situação</th><th class="r">Total</th><th class="r">Pago</th><th class="r">Saldo</th></tr></thead><tbody>${receber.map(p=>{const t=totaisDoc(p);return`<tr class="click" onclick="verPedido('${p.id}')"><td><b>#${p.num}</b> ${esc(nomeCli(p.cliente))}</td><td>${dBR(p.dataEntrega)}</td><td>${pill(p.status)}</td><td class="r">${brl(t.total)}</td><td class="r">${brl(t.pago)}</td><td class="r down"><b>${brl(t.saldo)}</b></td></tr>`}).join('')}</tbody></table></div>`:'<div class="empty">Nada a receber.</div>'}
