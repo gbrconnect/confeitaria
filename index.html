@@ -736,7 +736,7 @@ const UI={pedFiltro:'ativos',pedBusca:'',orcFiltro:'ativos',orcBusca:'',siteBusc
 
 function badges(){
  const al=alertas();
- return{painel:0,painelFin:al.filter(a=>a.fin).length,orcamentos:S.orcamentos.filter(o=>o.status==='aberto').length,pedidos:S.pedidos.filter(p=>p.status==='aguardando_sinal'&&frenteDe(p)==='encomenda').length,estacao:S.pedidos.filter(p=>p.status==='aguardando_sinal'&&frenteDe(p)==='estacao').length,online:siteNovos().length};
+ return{painel:0,painelFin:al.filter(a=>a.fin).length,orcamentos:S.orcamentos.filter(o=>o.status==='aberto').length,pedidos:S.pedidos.filter(p=>p.status==='aguardando_sinal'&&frenteDe(p)==='encomenda'&&!p.natal).length,natal:S.pedidos.filter(p=>p.status==='aguardando_sinal'&&p.natal).length,estacao:S.pedidos.filter(p=>p.status==='aguardando_sinal'&&frenteDe(p)==='estacao').length,online:siteNovos().length};
 }
 function renderNav(){
  const b=badges();const c=CFG();const mk=esc(c.marca||'Sweet Ka');
@@ -769,7 +769,7 @@ function alertas(){
  return a;
 }
 function cargaPorDia(de,ate){const m={};for(const p of S.pedidos){if(p.status==='cancelado'||p.dataEntrega<de||p.dataEntrega>ate)continue;m[p.dataEntrega]=(m[p.dataEntrega]||0)+p.itens.reduce((s,x)=>s+unidadesCap(x.p,x.q),0)}return m}
-const nomeCli=id=>(getCli(id)||{}).nome||'Cliente removido';
+const nomeCli=id=>id?((getCli(id)||{}).nome||'Cliente removido'):'Venda direta';
 function lembretes(){
  const T=hoje(),out=[],seen=new Set();
  for(const p of [...S.pedidos].sort((a,b)=>b.dataEntrega.localeCompare(a.dataEntrega))){
@@ -871,7 +871,7 @@ async function aceitarSite(id){
  const base={cliente:cli.id,titulo:est?'Estação Gourmet':'Encomenda pelo site',aniversariante:'',dataEntrega:data,hora,modo:est||d.modo==='entrega'?'entrega':'retirada',endereco:String(d.endereco||'').slice(0,200),itens,desconto:0,frete:0,obs:String(d.obs||'').slice(0,600),criado:hoje(),origemSite:id};
  let novo;
  if(est){novo={...base,id:uid('q'),num:CFG().proxOrc++,frente:'estacao',status:'aberto',sinalPct:CFG().sinalPct,validade:addDias(hoje(),CFG().validade),duracao:3,convidados:Math.max(0,+d.convidados||0)};S.orcamentos.push(novo)}
- else{novo={...base,id:uid('o'),num:CFG().proxPedido++,frente:'encomenda',status:'aguardando_sinal',pagamentos:[],baixado:false};S.pedidos.push(novo)}
+ else{novo={...base,id:uid('o'),num:CFG().proxPedido++,frente:'encomenda',status:'aguardando_sinal',pagamentos:[],baixado:false};if(itens.every(i=>(getProd(i.p)||{}).natal)){novo.natal=true;novo.titulo='Encomenda de Natal pelo site'}S.pedidos.push(novo)}
  save();await marcarSite(id,'aceito');render();
  aposResponder(id);
 }
@@ -1201,7 +1201,7 @@ function cardPedido(p){
  </div>`;
 }
 function pedidosView(fr){
- const est=fr==='estacao';const PS=S.pedidos.filter(p=>frenteDe(p)===fr);
+ const est=fr==='estacao';const PS=S.pedidos.filter(p=>frenteDe(p)===fr&&!p.natal);
  const T=hoje();let f=UI.pedFiltro;f=f==='pronto'||f==='prontos'?'prontos':f==='fim'||f==='entregue'||f==='cancelado'?'fim':'fazer';if(est&&f==='prontos')f='fazer';if(est&&UI.pedFiltro==='precos')f='precos';if(!est&&UI.pedFiltro==='precos')f='fazer';UI.pedFiltro=f;
  const b=UI.pedBusca.toLowerCase();const bate=p=>!b||(`${p.num} ${nomeCli(p.cliente)} ${p.titulo} ${p.aniversariante}`).toLowerCase().includes(b);
  const fazer=PS.filter(p=>(est?['aguardando_sinal','confirmado','producao','pronto']:['aguardando_sinal','confirmado','producao']).includes(p.status));const prontos=est?[]:PS.filter(p=>p.status==='pronto');const fim=PS.filter(p=>['entregue','cancelado'].includes(p.status));
@@ -1236,31 +1236,73 @@ R.pedidos=()=>pedidosView('encomenda');
 function natalIds(){return new Set(S.produtos.filter(p=>p.natal).map(p=>p.id))}
 function novoNatal(){abrirProduto();EP.natal=true;const n=$('#pr-natal');if(n)n.checked=true;const c=$('#pr-cat');if(c)c.value='Natal';Object.keys(FRENTES).forEach(k=>{const e=$('#pr-fr-'+k);if(e)e.checked=k==='encomenda'})}
 function natalSite(v){CFG().natalSite=v;save();render();toast(v?'Cardápio de Natal aparecendo na página de pedidos.':'Cardápio de Natal escondido da página de pedidos.')}
+const ehNatal=p=>!!(p&&p.natal);
+let NV={itens:{},forma:'Pix',desc:'',descTipo:'R$',cli:''};
+function nvAdd(pid,d=1){const q=(NV.itens[pid]||0)+d;if(q<=0)delete NV.itens[pid];else NV.itens[pid]=q;render()}
+function nvTot(){const sub=+Object.entries(NV.itens).reduce((s,[p,q])=>s+q*(+(getProd(p)||{}).preco||0),0).toFixed(2);const v=num(NV.desc);const d=v>0&&sub>0?+Math.min(sub,NV.descTipo==='%'?sub*Math.min(v,100)/100:v).toFixed(2):0;return{sub,d,tot:+(sub-d).toFixed(2)}}
+function nvRegistrar(){
+ const its=Object.entries(NV.itens).filter(([,q])=>q>0).map(([p,q])=>({p,q,v:+(getProd(p)||{}).preco||0}));if(!its.length)return;
+ const{sub,d,tot}=nvTot();
+ const p={id:uid('o'),num:CFG().proxPedido++,cliente:NV.cli||'',titulo:'Venda de Natal',aniversariante:'',dataEntrega:hoje(),hora:agoraHM(),modo:'retirada',endereco:'',itens:its,desconto:d,frete:0,status:'entregue',pagamentos:tot>0?[{data:hoje(),valor:tot,forma:NV.forma,tipo:'Total'}]:[],obs:'',criado:hoje(),baixado:false,frente:'encomenda',natal:true,venda:true};
+ S.pedidos.push(p);const f=NV.forma;NV={itens:{},forma:f,desc:'',descTipo:'R$',cli:''};save();render();toast(`Venda de ${brl(tot)} registrada`);
+}
+function nvDesfazer(id){askConfirm('Desfazer esta venda? Ela sai do faturamento e do caixa.','Desfazer venda',()=>{S.pedidos=S.pedidos.filter(p=>p.id!==id);save();closeModal();render();toast('Venda desfeita')},'Voltar')}
+function novaEncNatal(){editarDoc('ped',null,'natal')}
 R.natal=()=>{
- const ps=S.produtos.filter(p=>p.natal&&p.ativo!==false);const ids=natalIds();const ano=hoje().slice(0,4);
- const peds=S.pedidos.filter(p=>p.status!=='cancelado'&&p.dataEntrega>=ano+'-11-01'&&p.dataEntrega<=ano+'-12-31'&&p.itens.some(x=>ids.has(x.p))).sort((a,b)=>a.dataEntrega.localeCompare(b.dataEntrega));
+ const ps=S.produtos.filter(p=>p.natal&&p.ativo!==false);const ids=natalIds();const ano=hoje().slice(0,4);const T=hoje();
+ const doNatal=p=>p.status!=='cancelado'&&(p.natal||(p.dataEntrega>=ano+'-11-01'&&p.dataEntrega<=ano+'-12-31'&&p.itens.some(x=>ids.has(x.p))));
+ const peds=S.pedidos.filter(doNatal).sort((a,b)=>(a.dataEntrega+a.hora).localeCompare(b.dataEntrega+b.hora));
+ const encs=peds.filter(p=>!p.venda),vendas=peds.filter(p=>p.venda);
  let fat=0,cus=0;const vend={};
  const soma=(pid,q,v)=>{const c=custoProduto(getProd(pid)).total;fat+=q*v;cus+=q*c;vend[pid]=(vend[pid]||0)+q};
- peds.forEach(p=>p.itens.forEach(x=>{if(ids.has(x.p))soma(x.p,x.q,x.v)}));
+ peds.forEach(p=>{const k=p.itens.reduce((s,x)=>s+x.q*x.v,0);const f=k>0?Math.max(0,k-(+p.desconto||0))/k:1;p.itens.forEach(x=>{if(ids.has(x.p))soma(x.p,x.q,x.v*f)})});
  (S.carrinhos||[]).forEach(k=>(k.vendas||[]).forEach(v=>{if(v.data>=ano+'-11-01'&&v.data<=ano+'-12-31')(v.itens||[]).forEach(it=>{if(ids.has(it.p))soma(it.p,it.q,it.v)})}));
- const pend=peds.filter(p=>!['entregue','cancelado'].includes(p.status));const plano={};
+ const pend=encs.filter(ativo);const plano={};
  pend.forEach(p=>p.itens.forEach(x=>{if(!ids.has(x.p))return;(plano[p.dataEntrega]=plano[p.dataEntrega]||{})[x.p]=((plano[p.dataEntrega]||{})[x.p]||0)+x.q}));
- const on=!!CFG().natalSite;
- return head('Natal','Tudo da campanha de Natal num lugar só: produtos, encomendas, o que produzir e quanto está rendendo.',`<button class="btn pri" onclick="novoNatal()">${ico('plus')}Novo produto de Natal</button>`)
- +`
- <div class="grid g3" style="margin-bottom:16px">
-  <div class="card kpi"><div class="l">Vendido no Natal</div><div class="v num">${brl(fat)}</div><div class="d">Encomendas e carrinho (nov e dez)</div></div>
+ const aRec=pend.reduce((s,p)=>s+Math.max(0,totaisDoc(p).saldo),0);
+ const on=!!CFG().natalSite;const tab=UI.natTab||'vender';
+ const tabs=[['vender','Vender',0],['encomendas','Encomendas',pend.length],['produzir','O que produzir',0],['produtos','Produtos',0]];
+ let corpo='';
+ if(tab==='vender'){
+  const{sub,d,tot}=nvTot();const q=Object.values(NV.itens).reduce((s,x)=>s+x,0);
+  const hojeV=vendas.filter(p=>p.dataEntrega===T).sort((a,b)=>b.hora.localeCompare(a.hora));const antV=vendas.filter(p=>p.dataEntrega!==T).sort((a,b)=>(b.dataEntrega+b.hora).localeCompare(a.dataEntrega+a.hora)).slice(0,30);
+  const cliOpts=[...S.clientes].sort((a,b)=>a.nome.localeCompare(b.nome)).map(c=>`<option value="${c.id}" ${c.id===NV.cli?'selected':''}>${esc(c.nome)}</option>`).join('');
+  const linhaV=p=>`<div class="alert"><span class="num muted" style="width:${p.dataEntrega===T?44:84}px">${p.dataEntrega===T?p.hora:dCurto(p.dataEntrega)+' '+p.hora}</span><div style="flex:1;min-width:0">${p.itens.map(x=>`${nq(x.q)} ${esc((getProd(x.p)||{}).nome||'?')}`).join(', ')}<br><span class="small muted">${p.cliente?esc(nomeCli(p.cliente))+' · ':''}${(p.pagamentos[0]||{}).forma||''}${p.desconto?` · desconto de ${brl(p.desconto)}`:''}</span></div><b class="num">${brl(totaisDoc(p).total)}</b><button class="x" title="Ver venda" aria-label="Ver venda" onclick="verPedido('${p.id}')">${ico('edit','width="16" height="16"')}</button><button class="x" title="Desfazer venda" aria-label="Desfazer venda" onclick="nvDesfazer('${p.id}')">${ico('x','width="16" height="16"')}</button></div>`;
+  corpo=ps.length?`<div class="pos">
+  <div class="pos-grid">${ps.map(p=>{const n=NV.itens[p.id]||0;return`<div class="pos-w"><button class="pos-p" onclick="nvAdd('${p.id}')">${n?`<span class="pos-q">${n}</span>`:''}${avatar(p,'md')}<span class="pos-n">${esc(p.nome)}</span><span class="pos-v num">${+p.preco>0?brl(p.preco):'<span class="muted">sem preço</span>'}</span></button>${n?`<button class="pos-menos" onclick="nvAdd('${p.id}',-1)" aria-label="Tirar um">−</button>`:''}</div>`}).join('')}</div>
+  <div class="tk card"><h3>Venda atual ${q?`<button class="btn sm ghost" onclick="NV.itens={};NV.desc='';render()">Limpar</button>`:''}</h3>
+   ${q?`<div class="tk-l">${Object.entries(NV.itens).map(([p,n])=>`<div class="tk-i"><span class="nm">${avatar(getProd(p),'sm')}<span>${esc((getProd(p)||{}).nome)}</span></span><span class="tk-c"><button class="x" onclick="nvAdd('${p}',-1)" aria-label="Menos um">−</button><b class="num">${n}</b><button class="x" onclick="nvAdd('${p}',1)" aria-label="Mais um">+</button></span><span class="num">${brl(n*(+(getProd(p)||{}).preco||0))}</span></div>`).join('')}</div>
+   <div class="frow" style="margin-top:10px;align-items:end"><label class="f">Desconto<input type="text" inputmode="decimal" id="nv-desc" placeholder="0" value="${esc(NV.desc)}" oninput="NV.desc=this.value;rerenderKeep('nv-desc')"></label><div class="chips" style="padding-bottom:4px">${['R$','%'].map(t=>`<button class="chip ${NV.descTipo===t?'on':''}" onclick="NV.descTipo='${t}';render()">${t}</button>`).join('')}</div></div>${d>0?`<div class="small muted" style="display:flex;justify-content:space-between;margin-top:8px"><span>Subtotal ${brl(sub)}</span><span>Desconto −${brl(d)}</span></div>`:''}
+   <label class="f" style="margin-top:10px">Cliente <small>(opcional)</small><select onchange="NV.cli=this.value"><option value="">Sem cliente</option>${cliOpts}</select></label>`:'<div class="muted small">Toque em um produto para adicionar.</div>'}
+   <div class="tk-tot"><span>Total${q?` <span class="small muted">(${q} ${q>1?'itens':'item'})</span>`:''}</span><b class="num">${brl(tot)}</b></div>
+   <div class="chips" style="margin:10px 0">${FORMAS_CAR.map(f=>`<button class="chip ${NV.forma===f?'on':''}" onclick="NV.forma='${f}';render()">${f}</button>`).join('')}</div>
+   <button class="btn pri" style="width:100%;padding:12px" onclick="nvRegistrar()" ${q?'':'disabled'}>Registrar venda${q?` · ${brl(tot)}`:''}</button>
+   <div class="small muted" style="margin-top:8px">Para pedido com data de entrega, use <a href="#" onclick="event.preventDefault();novaEncNatal()">Nova encomenda</a>.</div></div></div>
+  <div class="card" style="margin-top:16px"><h3>Vendas de hoje ${hojeV.length?`<span class="small muted num">${brl(hojeV.reduce((s,p)=>s+totaisDoc(p).total,0))}</span>`:''}</h3>${hojeV.length?hojeV.map(linhaV).join(''):'<div class="muted small">Nenhuma venda hoje.</div>'}</div>
+  ${antV.length?`<div class="card" style="margin-top:16px"><h3>Vendas anteriores</h3>${antV.map(linhaV).join('')}</div>`:''}`:'<div class="empty">Cadastre os produtos de Natal para começar a vender.</div>';
+ }else if(tab==='encomendas'){
+  const fim=encs.filter(p=>!ativo(p)).sort((a,b)=>b.dataEntrega.localeCompare(a.dataEntrega));
+  corpo=`${pend.length?`<div class="list">${pend.map(cardPedido).join('')}</div>`:`<div class="empty">Nenhuma encomenda de Natal para fazer. Toque em "Nova encomenda" para registrar.</div>`}
+  ${fim.length?`<div class="grp">Entregues <span>${fim.length}</span></div><div class="list">${fim.map(cardPedido).join('')}</div>`:''}`;
+ }else if(tab==='produzir'){
+  corpo=`<div class="card">${Object.keys(plano).length?Object.keys(plano).sort().map(d=>`<div style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:4px">${SEMLONGO[toDate(d).getDay()]}, ${dBR(d)}</div>${Object.entries(plano[d]).map(([pid,q])=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--line)"><span>${esc((getProd(pid)||{}).nome||'?')}</span><b class="num">${nq(q)}</b></div>`).join('')}</div>`).join(''):'<div class="empty">Nenhuma encomenda de Natal para produzir.</div>'}</div>`;
+ }else{
+  corpo=`<div class="card">${ps.length?`<div class="tbl-wrap"><table><thead><tr><th>Produto</th><th class="r">Preço</th><th class="r">Custo</th><th class="r">Margem</th><th class="r">Vendidos</th></tr></thead><tbody>${ps.map(p=>{const c=custoProduto(p).total;const m=+p.preco>0?(p.preco-c)/p.preco:0;return`<tr class="click" onclick="abrirProduto('${p.id}')"><td><span class="nm" style="display:flex;gap:8px;align-items:center">${avatar(p,'sm')}<b>${esc(p.nome)}</b></span></td><td class="r num">${brl(p.preco)}</td><td class="r num">${c>0?brl(c):'<span class="muted">sem custo</span>'}</td><td class="r">${c>0?mgChip(m):'-'}</td><td class="r num">${nq(vend[p.id]||0)}</td></tr>`}).join('')}</tbody></table></div>`:'<div class="empty">Nenhum produto de Natal ainda.</div>'}</div>
+  <div style="margin-top:14px;display:flex;justify-content:flex-end"><label class="chk small muted" style="font-size:12.5px"><input type="checkbox" ${on?'checked':''} onchange="natalSite(this.checked)"> Mostrar produtos de Natal na página de pedidos</label></div>`;
+ }
+ return head('Natal','Venda, encomendas e produção do Natal num lugar só, separados do resto da confeitaria.',`<button class="btn" onclick="novoNatal()">${ico('plus')}Produto</button><button class="btn pri" onclick="novaEncNatal()">${ico('plus')}Nova encomenda</button>`)
+ +`<div class="grid g4" style="margin-bottom:16px">
+  <div class="card kpi"><div class="l">Vendido no Natal</div><div class="v num">${brl(fat)}</div><div class="d">Vendas, encomendas e carrinho</div></div>
   <div class="card kpi"><div class="l">Lucro bruto</div><div class="v num up">${brl(fat-cus)}</div><div class="d">${fat>0?'Margem de '+pct((fat-cus)/fat):'Venda menos custo dos produtos'}</div></div>
-  <div class="card kpi"><div class="l">Encomendas de Natal</div><div class="v num">${peds.length}</div><div class="d">${pend.length} para entregar</div></div></div>
- <div class="card" style="margin-bottom:16px"><h3>Produtos de Natal</h3>${ps.length?`<div class="tbl-wrap"><table><thead><tr><th>Produto</th><th class="r">Preço</th><th class="r">Custo</th><th class="r">Margem</th><th class="r">Vendidos</th><th></th></tr></thead><tbody>${ps.map(p=>{const c=custoProduto(p).total;const m=+p.preco>0?(p.preco-c)/p.preco:0;return`<tr class="click" onclick="abrirProduto('${p.id}')"><td><b>${esc(p.nome)}</b>${p.desc?`<div class="small muted">${esc(p.desc)}</div>`:''}</td><td class="r num">${brl(p.preco)}</td><td class="r num">${c>0?brl(c):'<span class="muted">sem custo</span>'}</td><td class="r">${c>0?mgChip(m):'-'}</td><td class="r num">${nq(vend[p.id]||0)}</td><td class="r"><button class="btn sm">Editar</button></td></tr>`}).join('')}</tbody></table></div>`:`<div class="empty">Nenhum produto de Natal ainda. Toque em <b>Novo produto de Natal</b>, ou marque "Produto de Natal" em um produto que já existe.</div>`}</div>
- <div class="grid g2">
-  <div class="card"><h3>O que produzir</h3>${Object.keys(plano).length?Object.keys(plano).sort().map(d=>`<div style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:4px">${SEMLONGO[toDate(d).getDay()]}, ${dBR(d)}</div>${Object.entries(plano[d]).map(([pid,q])=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--line)"><span>${esc((getProd(pid)||{}).nome||'?')}</span><b class="num">${nq(q)}</b></div>`).join('')}</div>`).join(''):'<div class="empty">Nenhuma encomenda de Natal para produzir.</div>'}</div>
-  <div class="card"><h3>Encomendas de Natal</h3>${peds.length?`<div class="list">${peds.map(p=>itemPedido(p)).join('')}</div>`:'<div class="empty">As encomendas com produtos de Natal aparecem aqui.</div>'}</div></div><div style="margin-top:14px;display:flex;justify-content:flex-end"><label class="chk small muted" style="font-size:12.5px"><input type="checkbox" ${on?'checked':''} onchange="natalSite(this.checked)"> Mostrar produtos de Natal na página de pedidos</label></div>`};
+  <div class="card kpi"><div class="l">Encomendas</div><div class="v num">${encs.length}</div><div class="d">${pend.length} para entregar</div></div>
+  <div class="card kpi"><div class="l">A receber</div><div class="v num">${brl(aRec)}</div><div class="d">das encomendas em aberto</div></div></div>
+ <div class="tabs">${tabs.map(([k,l,n])=>`<button class="${tab===k?'on':''}" onclick="UI.natTab='${k}';render()">${l}${n?` <span class="tabn">${n}</span>`:''}</button>`).join('')}</div>
+ ${corpo}`};
 R.estacao=()=>pedidosView('estacao');
 function rerenderKeep(id){const el=document.getElementById(id);const pos=el?el.selectionStart:0;render();const n=document.getElementById(id);if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(e){}}}
 
 function verPedido(id){
- _q=false;const p=S.pedidos.find(x=>x.id===id);if(!p)return;const t=totaisDoc(p);const c=getCli(p.cliente)||{};
+ _q=false;const p=S.pedidos.find(x=>x.id===id);if(!p)return;const t=totaisDoc(p);const c=getCli(p.cliente)||(p.cliente?{}:{nome:'Venda direta (sem cliente)'});
  const est=frenteDe(p)==='estacao';const prox=proxDe(p);
  const body=`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${pillP(p)}<span class="muted small">Criado em ${dBR(p.criado)}</span></div>
  <div class="detail-grid">
@@ -1288,7 +1330,7 @@ function verPedido(id){
   <button class="btn wa" onclick="gerarPDF('ped','${p.id}','wa')">${ico('whats')}Enviar no WhatsApp</button>
   <button class="btn" onclick="editarDoc('ped','${p.id}')">Editar</button>
   ${prox?`<button class="btn pri" onclick="mudarStatus('${p.id}','${prox[0]}')">${prox[1]}</button>`:''}`;
- openModal(`${est?'Estação Gourmet':'Encomenda'} #${p.num}`,body,foot,true);
+ openModal(`${est?'Estação Gourmet':p.venda?'Venda de Natal':p.natal?'Encomenda de Natal':'Encomenda'} #${p.num}`,body,foot,true);
 }
 function mudarStatus(id,st,forcar){
  const p=S.pedidos.find(x=>x.id===id);const t=totaisDoc(p);
@@ -1399,8 +1441,8 @@ function editarDoc(kind,id,fr){
  if(id)d=clone(col.find(x=>x.id===id));
  else{const dt=UI.novaData||addDias(hoje(),7);UI.novaData=null;d={id:'',num:0,cliente:'',titulo:'',aniversariante:'',dataEntrega:dt,hora:'14:00',modo:'retirada',endereco:'',itens:(p0=>p0?[{p:p0.id,q:p0.contaCap?100:1,v:p0.preco}]:[])(S.produtos.find(x=>x.ativo!==false)),desconto:0,frete:0,obs:''};
   if(kind==='ped'){d.status='aguardando_sinal';d.pagamentos=[];d.criado=hoje();d.baixado=false}else{d.status='aberto';d.sinalPct=CFG().sinalPct;d.criado=hoje();d.validade=addDias(hoje(),CFG().validade)}}
- if(!id){d.frente=fr==='estacao'?'estacao':'encomenda';if(d.frente==='estacao'){d.modo='entrega';d.hora='19:00';d.duracao=3;d.convidados=0}const p0=S.produtos.find(x=>x.ativo!==false&&naFrente(x,d.frente));d.itens=p0?[{p:p0.id,q:d.frente==='estacao'?1:(p0.contaCap?100:1),v:p0.preco}]:[]}
- const est=frenteDe(d)==='estacao';const nd=kind==='orc'?['Novo orçamento'+(est?' de estação':''),'orçamento']:est?['Novo pedido de estação','pedido']:['Nova encomenda','encomenda'];
+ if(!id){d.frente=fr==='estacao'?'estacao':'encomenda';if(fr==='natal'){d.natal=true;d.titulo='Encomenda de Natal'}if(d.frente==='estacao'){d.modo='entrega';d.hora='19:00';d.duracao=3;d.convidados=0}const p0=S.produtos.find(x=>x.ativo!==false&&(d.natal?x.natal:naFrente(x,d.frente)));d.itens=p0?[{p:p0.id,q:d.frente==='estacao'||d.natal?1:(p0.contaCap?100:1),v:p0.preco}]:[]}
+ const est=frenteDe(d)==='estacao';const nd=kind==='orc'?['Novo orçamento'+(est?' de estação':''),'orçamento']:est?['Novo pedido de estação','pedido']:d.natal?['Nova encomenda de Natal','encomenda']:['Nova encomenda','encomenda'];
  ED={kind,d,novoCli:false};
  const cliOpts=[...S.clientes].sort((a,b)=>a.nome.localeCompare(b.nome)).map(c=>`<option value="${c.id}" ${c.id===d.cliente?'selected':''}>${esc(c.nome)}</option>`).join('');
  const body=`<div class="sec">Cliente e ocasião</div>
@@ -1434,9 +1476,9 @@ function edExtras(x){if(frenteDe(ED.d)!=='estacao')return'';const p=getProd(x.p)
  ${ads.length?`<div style="margin-top:${inc.length?6:0}px;display:flex;flex-wrap:wrap;gap:6px;align-items:center"><b>Acréscimos:</b>${ads.map(a=>{const on=ED.d.itens.some(y=>y.p===a.id);return`<label style="display:inline-flex;gap:5px;align-items:center;padding:3px 9px;border:1px solid var(--line,#e5dccd);border-radius:20px;cursor:pointer;background:${on?'#f1e3cc':'#fff'}"><input type="checkbox" ${on?'checked':''} onchange="edAd('${a.id}',this.checked)" style="margin:0">${esc(a.nome)} <span class="muted">${brl(a.preco)}</span></label>`}).join('')}</div>`:''}</div>`}
 function edAd(id,on){const a=getProd(id);if(on){if(!ED.d.itens.some(y=>y.p===id))ED.d.itens.push({p:id,q:1,v:a.preco})}else ED.d.itens=ED.d.itens.filter(y=>y.p!==id);edItens()}
 function edCli(v){$('#ed-novocli').hidden=v!=='__novo';if(v==='__novo')$('#ed-nc-nome').focus()}
-function prodOptions(sel,excl,fr){const ok=p=>p.ativo!==false&&(!fr||naFrente(p,fr)||p.id===sel);const cats=[...new Set(S.produtos.filter(ok).map(p=>p.cat))];return cats.map(c=>`<optgroup label="${esc(c)}">${S.produtos.filter(p=>p.cat===c&&ok(p)&&p.id!==excl).map(p=>`<option value="${p.id}" ${p.id===sel?'selected':''}>${esc(p.nome)}</option>`).join('')}</optgroup>`).join('')}
+function prodOptions(sel,excl,fr){const ok=p=>p.ativo!==false&&(!fr||(fr==='natal'?p.natal:naFrente(p,fr))||p.id===sel);const cats=[...new Set(S.produtos.filter(ok).map(p=>p.cat))];return cats.map(c=>`<optgroup label="${esc(c)}">${S.produtos.filter(p=>p.cat===c&&ok(p)&&p.id!==excl).map(p=>`<option value="${p.id}" ${p.id===sel?'selected':''}>${esc(p.nome)}</option>`).join('')}</optgroup>`).join('')}
 function edItens(){
- $('#ed-itens').innerHTML=ED.d.itens.map((x,i)=>`<div class="irow"><select id="ed-p-${i}" onchange="edProd(${i},this.value)">${prodOptions(x.p,undefined,frenteDe(ED.d))}</select>
+ $('#ed-itens').innerHTML=ED.d.itens.map((x,i)=>`<div class="irow"><select id="ed-p-${i}" onchange="edProd(${i},this.value)">${prodOptions(x.p,undefined,ED.d.natal?'natal':frenteDe(ED.d))}</select>
   <input type="text" inputmode="decimal" id="ed-q-${i}" value="${nq(x.q)}" oninput="ED.d.itens[${i}].q=num(this.value);edTab(${i});edUpd()">
   <input type="text" inputmode="decimal" id="ed-v-${i}" value="${n2(x.v)}" oninput="ED.d.itens[${i}].v=num(this.value);edUpd()">
   <span class="tot" id="ed-t-${i}">${brl(x.q*x.v)}</span><button class="x" title="Remover item" onclick="ED.d.itens.splice(${i},1);edItens()">${ico('x','width="16" height="16"')}</button></div>${edExtras(x)}`).join('')||'<div class="muted small">Nenhum item. Adicione pelo botão abaixo.</div>';
@@ -1445,7 +1487,7 @@ function edItens(){
 function edProd(i,v){ED.d.itens[i].p=v;ED.d.itens[i].v=getProd(v).preco;const p=getProd(v);if(p&&p.cobranca==='pessoa'){const c=+num(($('#ed-conv')||{}).value||'')||0;if(c>0){ED.d.itens[i].q=c;$('#ed-q-'+i).value=nq(c)}}edTab(i);$('#ed-v-'+i).value=n2(ED.d.itens[i].v);edUpd()}
 function edTab(i){const x=ED.d.itens[i];const p=x&&getProd(x.p);if(!p||!['pessoa','faixa'].includes(p.cobranca))return;const n=p.cobranca==='pessoa'?+x.q||0:+num(($('#ed-conv')||{}).value||'')||0;if(!(n>0))return;const c=calcCob(p,n);if(c==null)return;x.v=p.cobranca==='pessoa'?Math.round(c/n*100)/100:c;const e=$('#ed-v-'+i);if(e&&document.activeElement!==e)e.value=n2(x.v)}
 function edConv(){const c=+num($('#ed-conv').value)||0;ED.d.itens.forEach((x,i)=>{const p=getProd(x.p);if(p&&p.cobranca==='pessoa'&&c>0){x.q=c;const q=$('#ed-q-'+i);if(q)q.value=nq(c)}edTab(i)});edUpd()}
-function edAdd(){const F=frenteDe(ED.d);const p0=S.produtos.find(x=>x.ativo!==false&&naFrente(x,F));if(!p0)return toast('Cadastre um produto em Produtos e preços para adicionar itens.','bad');ED.d.itens.push({p:p0.id,q:F==='estacao'?1:(p0.contaCap?50:1),v:p0.preco});edItens()}
+function edAdd(){const F=frenteDe(ED.d);const p0=S.produtos.find(x=>x.ativo!==false&&(ED.d.natal?x.natal:naFrente(x,F)));if(!p0)return toast('Cadastre um produto em Produtos e preços para adicionar itens.','bad');ED.d.itens.push({p:p0.id,q:F==='estacao'||ED.d.natal?1:(p0.contaCap?50:1),v:p0.preco});edItens()}
 function edUpd(){
  const d=ED.d;d.desconto=num($('#ed-desc').value);d.frete=num($('#ed-frete').value);d.dataEntrega=$('#ed-data').value||d.dataEntrega;
  d.itens.forEach((x,i)=>{const e=$('#ed-t-'+i);if(e)e.textContent=brl(x.q*x.v)});
@@ -1465,7 +1507,7 @@ function edSalvar(){
  if(!cli)return toast('Selecione a cliente.','bad');
  if(!d.itens.length)return toast('Adicione pelo menos um item.','bad');
  if(d.itens.some(x=>!(x.q>0)))return toast('Todas as quantidades precisam ser maiores que zero.','bad');
- Object.assign(d,{cliente:cli,titulo:$('#ed-tit').value.trim()||(frenteDe(d)==='estacao'?'Estação Gourmet':'Encomenda'),aniversariante:$('#ed-aniv').value.trim(),hora:$('#ed-hora').value||'14:00',modo:$('#ed-modo').value,endereco:$('#ed-end').value.trim(),obs:$('#ed-obs').value.trim()});
+ Object.assign(d,{cliente:cli,titulo:$('#ed-tit').value.trim()||(frenteDe(d)==='estacao'?'Estação Gourmet':d.natal?'Encomenda de Natal':'Encomenda'),aniversariante:$('#ed-aniv').value.trim(),hora:$('#ed-hora').value||'14:00',modo:$('#ed-modo').value,endereco:$('#ed-end').value.trim(),obs:$('#ed-obs').value.trim()});
  if(frenteDe(d)==='estacao'){d.duracao=num($('#ed-dur').value)||0;d.convidados=num($('#ed-conv').value)||0;d.modo='entrega'}
  if(ED.kind==='orc'){d.sinalPct=num($('#ed-sinal').value)||CFG().sinalPct;d.validade=$('#ed-val').value||d.validade}
  const col=ED.kind==='ped'?S.pedidos:S.orcamentos;
@@ -1480,7 +1522,7 @@ const ST_COR={aguardando_sinal:'var(--warn)',confirmado:'var(--lilac)',producao:
 R.agenda=()=>{
  const T=hoje();const k=UI.agMes||(UI.agMes=T.slice(0,7));const sel=UI.agDia||(UI.agDia=T);const cap=capLim();
  const y=+k.slice(0,4),m=+k.slice(5,7)-1;const nd=new Date(y,m+1,0).getDate();const off=new Date(y,m,1).getDay();
- const porDia={};let nMes=0;for(const p of S.pedidos){if(p.status==='cancelado'||p.dataEntrega.slice(0,7)!==k)continue;(porDia[p.dataEntrega]=porDia[p.dataEntrega]||[]).push(p);nMes++}
+ const porDia={};let nMes=0;for(const p of S.pedidos){if(p.status==='cancelado'||p.venda||p.dataEntrega.slice(0,7)!==k)continue;(porDia[p.dataEntrega]=porDia[p.dataEntrega]||[]).push(p);nMes++}
  let cells='';for(let i=0;i<off;i++)cells+='<div class="cal-d out"></div>';
  for(let d=1;d<=nd;d++){const dia=k+'-'+String(d).padStart(2,'0');const ps=(porDia[dia]||[]).sort((a,b)=>a.hora.localeCompare(b.hora));const un=ps.reduce((s,p)=>s+totaisDoc(p).un,0);const cheio=un>cap;
   cells+=`<button class="cal-d ${dia===T?'hoje':''} ${dia===sel?'sel':''} ${dia<T?'pass':''} ${cheio?'cheio':''}" onclick="UI.agDia='${dia}';render()" aria-label="Dia ${d}, ${ps.length} pedido${ps.length===1?'':'s'}"><span class="cal-top"><span class="n">${d}</span>${cheio?'<span class="cal-cheio">cheio</span>':''}</span>
