@@ -747,7 +747,7 @@ function renderNav(){
  h+=`</div><div class="foot">${S.exemplo?'<span class="demo">Dados de exemplo</span><br>':''}${NUVEM&&USER?`${syncHtml()}<br>${esc(nomeUsuario())}<br><a href="#" onclick="event.preventDefault();sair()">Sair</a>`:`Sistema de gestão da ${esc(CFG().empresa)}`}</div>`;
  if(NUVEM)$('#top-chip').innerHTML=syncHtml();
  $('#side').innerHTML=h;
- const bn=['painel','carrinho','estacao','pedidos'];
+ const bn=['painel','carrinho',vePagina('natal')?'natal':'estacao','pedidos'];
  $('#bottomnav').innerHTML=bn.map(id=>{const p=PAGES.find(x=>x.id===id);return`<button class="${PAGE===id?'on':''}" onclick="go('${id}')">${ico(id)}<span>${id==='estacao'?'Estação':p.label}</span>${b[id]?`<span class="badge">${b[id]}</span>`:''}</button>`}).join('')
   +`<button class="${bn.includes(PAGE)?'':'on'}" onclick="menuMais()">${ico('mais')}<span>Mais</span>${b.online?`<span class="badge">${b.online}</span>`:''}</button>`;
 }
