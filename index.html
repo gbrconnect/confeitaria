@@ -1261,7 +1261,7 @@ R.natal=()=>{
  pend.forEach(p=>p.itens.forEach(x=>{if(!ids.has(x.p))return;(plano[p.dataEntrega]=plano[p.dataEntrega]||{})[x.p]=((plano[p.dataEntrega]||{})[x.p]||0)+x.q}));
  const aRec=pend.reduce((s,p)=>s+Math.max(0,totaisDoc(p).saldo),0);
  const on=!!CFG().natalSite;const tab=UI.natTab||'vender';
- const tabs=[['vender','Vender',0],['encomendas','Encomendas',pend.length],['produzir','O que produzir',0],['produtos','Produtos',0]];
+ const tabs=[['vender','Vender',0],['encomendas','Encomendas',pend.length],['calendario','Calendário',0],['produtos','Produtos',0]];
  let corpo='';
  if(tab==='vender'){
   const{sub,d,tot}=nvTot();const q=Object.values(NV.itens).reduce((s,x)=>s+x,0);
@@ -1284,8 +1284,22 @@ R.natal=()=>{
   const fim=encs.filter(p=>!ativo(p)).sort((a,b)=>b.dataEntrega.localeCompare(a.dataEntrega));
   corpo=`${pend.length?`<div class="list">${pend.map(cardPedido).join('')}</div>`:`<div class="empty">Nenhuma encomenda de Natal para fazer. Toque em "Nova encomenda" para registrar.</div>`}
   ${fim.length?`<div class="grp">Entregues <span>${fim.length}</span></div><div class="list">${fim.map(cardPedido).join('')}</div>`:''}`;
- }else if(tab==='produzir'){
-  corpo=`<div class="card">${Object.keys(plano).length?Object.keys(plano).sort().map(d=>`<div style="margin-bottom:12px"><div style="font-weight:700;margin-bottom:4px">${SEMLONGO[toDate(d).getDay()]}, ${dBR(d)}</div>${Object.entries(plano[d]).map(([pid,q])=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--line)"><span>${esc((getProd(pid)||{}).nome||'?')}</span><b class="num">${nq(q)}</b></div>`).join('')}</div>`).join(''):'<div class="empty">Nenhuma encomenda de Natal para produzir.</div>'}</div>`;
+ }else if(tab==='calendario'){
+  const k=UI.natMes||(UI.natMes=T.slice(0,7));const sel=UI.natDia||(UI.natDia=T);
+  const y=+k.slice(0,4),m=+k.slice(5,7)-1;const nd=new Date(y,m+1,0).getDate();const off=new Date(y,m,1).getDay();
+  const porDia={};let nMes=0;for(const p of encs){if(p.dataEntrega.slice(0,7)!==k)continue;(porDia[p.dataEntrega]=porDia[p.dataEntrega]||[]).push(p);nMes++}
+  let cells='';for(let i=0;i<off;i++)cells+='<div class="cal-d out"></div>';
+  for(let d=1;d<=nd;d++){const dia=k+'-'+String(d).padStart(2,'0');const L=(porDia[dia]||[]).sort((a,b)=>a.hora.localeCompare(b.hora));
+   cells+=`<button class="cal-d ${dia===T?'hoje':''} ${dia===sel?'sel':''} ${dia<T?'pass':''}" onclick="UI.natDia='${dia}';render()" aria-label="Dia ${d}, ${L.length} encomenda${L.length===1?'':'s'}"><span class="cal-top"><span class="n">${d}</span></span>
+   ${L.slice(0,2).map(p=>`<span class="cal-e st-${p.status}">${p.hora} ${esc(primeiroNome(p.cliente))}</span>`).join('')}${L.length>2?`<span class="cal-m">mais ${L.length-2}</span>`:''}
+   ${L.length?`<span class="cal-dots">${L.slice(0,4).map(p=>`<i style="background:${ST_COR[p.status]}"></i>`).join('')}</span>`:''}</button>`}
+  for(let i=off+nd;i%7;i++)cells+='<div class="cal-d out"></div>';
+  const dsel=encs.filter(p=>p.dataEntrega===sel).sort((a,b)=>a.hora.localeCompare(b.hora));const agg={};for(const p of dsel)if(p.status!=='entregue')for(const x of p.itens)agg[x.p]=(agg[x.p]||0)+x.q;const dt=toDate(sel);
+  corpo=`<div class="mesnav" style="margin-bottom:10px"><button class="btn sm" onclick="UI.natMes=addMes('${k}',-1);render()" aria-label="Mês anterior">‹</button><span class="strong">${mesLabel(k)}</span><button class="btn sm" onclick="UI.natMes=addMes('${k}',1);render()" aria-label="Próximo mês">›</button><button class="btn sm" onclick="UI.natMes=hoje().slice(0,7);UI.natDia=hoje();render()">Hoje</button></div>
+  <div class="cal"><div class="cal-h">${SEM.map(x=>`<span>${x}</span>`).join('')}</div><div class="cal-g">${cells}</div></div>
+  <div class="cal-leg"><span>${nMes} encomenda${nMes===1?'':'s'} de Natal em ${MESES[m]}</span>${[['aguardando_sinal','Aguardando sinal'],['confirmado','Confirmado'],['producao','Em produção'],['pronto','Pronto'],['entregue','Entregue']].map(([x,l])=>`<span><i style="background:${ST_COR[x]}"></i>${l}</span>`).join('')}</div>
+  <div class="card" style="margin-top:14px"><h3><span>${SEMLONGO[dt.getDay()]}, ${dBR(sel)}${sel===T?' · hoje':''}</span><button class="btn sm" onclick="UI.novaData='${sel}';novaEncNatal()">${ico('plus')}Encomenda</button></h3>
+  ${dsel.length?`<div class="list">${dsel.map(cardPedido).join('')}</div>${Object.keys(agg).length?`<div class="sec" style="margin-top:16px">O que produzir para este dia</div><ul class="prodlist">${Object.entries(agg).map(([id,q])=>`<li><span class="nm">${avatar(getProd(id),'sm')}<span>${esc((getProd(id)||{}).nome)}</span></span><b class="num">${nq(q)}</b></li>`).join('')}</ul>`:''}`:'<div class="empty">Nenhuma encomenda de Natal neste dia.</div>'}</div>`;
  }else{
   corpo=`<div class="card">${ps.length?`<div class="tbl-wrap"><table><thead><tr><th>Produto</th><th class="r">Preço</th><th class="r">Custo</th><th class="r">Margem</th><th class="r">Vendidos</th></tr></thead><tbody>${ps.map(p=>{const c=custoProduto(p).total;const m=+p.preco>0?(p.preco-c)/p.preco:0;return`<tr class="click" onclick="abrirProduto('${p.id}')"><td><span class="nm" style="display:flex;gap:8px;align-items:center">${avatar(p,'sm')}<b>${esc(p.nome)}</b></span></td><td class="r num">${brl(p.preco)}</td><td class="r num">${c>0?brl(c):'<span class="muted">sem custo</span>'}</td><td class="r">${c>0?mgChip(m):'-'}</td><td class="r num">${nq(vend[p.id]||0)}</td></tr>`}).join('')}</tbody></table></div>`:'<div class="empty">Nenhum produto de Natal ainda.</div>'}</div>
   <div style="margin-top:14px;display:flex;justify-content:flex-end"><label class="chk small muted" style="font-size:12.5px"><input type="checkbox" ${on?'checked':''} onchange="natalSite(this.checked)"> Mostrar produtos de Natal na página de pedidos</label></div>`;
