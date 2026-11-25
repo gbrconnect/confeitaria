@@ -24,13 +24,13 @@ header img{max-height:92px;max-width:260px}
 h2{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:28px 0 4px;font-weight:800}
 .h2s{color:var(--muted);font-size:13.5px;margin:0 0 12px}
 .cat{font-weight:700;margin:16px 0 8px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
-.p{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;display:grid;grid-template-columns:74px minmax(0,1fr);gap:12px;align-items:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));grid-auto-rows:1fr;gap:12px}
+.p{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;grid-template-columns:74px minmax(0,1fr);gap:14px;align-items:stretch;height:100%;box-sizing:border-box;min-height:150px}.p>.ft{align-self:center}.p>div:last-child{display:flex;flex-direction:column;min-width:0}.p .row{margin-top:auto;padding-top:8px}
 .p.on{border-color:var(--gold);box-shadow:0 0 0 2px var(--soft)}
 .ft{width:74px;height:74px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:26px;color:var(--gold);overflow:hidden}
 .ft img{width:100%;height:100%;object-fit:cover}
-.p b{display:block;line-height:1.25}
-.p .d{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.p>div>b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.25;font-size:16px}
+.p .d{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--muted);font-size:13px;margin-top:2px;cursor:pointer}.p .d.full{display:block}.p .tag{align-self:flex-start;white-space:nowrap}
 .p .v{font-weight:800;color:var(--gold);margin-top:4px}
 .row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;flex-wrap:wrap}
 .qt{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:#fff}
@@ -60,10 +60,10 @@ textarea{min-height:76px;resize:vertical}
 .res ul{list-style:none;margin:6px 0 0;padding:0}
 .note{font-size:13px;color:var(--muted);margin-top:8px}
 .err{color:var(--bad);font-size:13.5px;margin-top:10px;font-weight:600}
-.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
-.catb{font:inherit;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;display:grid;grid-template-columns:74px minmax(0,1fr) auto;gap:14px;align-items:center;cursor:pointer;color:var(--ink)}
+.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));grid-auto-rows:1fr;gap:12px}
+.catb{font:inherit;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;height:100%;box-sizing:border-box;min-height:150px;width:100%;display:grid;grid-template-columns:74px minmax(0,1fr) auto;gap:14px;align-items:center;cursor:pointer;color:var(--ink)}
 .catb:hover{border-color:var(--gold)}
-.catb b{display:block;font-size:17px}
+.catb b{display:block;font-size:16px}
 .catb .d{display:block;color:var(--muted);font-size:13px;margin-top:2px}
 .catb .go{font-size:26px;color:var(--gold)}
 .sinal{background:#FFF6E0;border:1.5px solid #E2B84D;border-radius:12px;padding:12px 14px;margin-top:14px;font-size:14px;line-height:1.45;color:#5c4510}.sinal .s2{display:block;margin-top:8px;padding-top:8px;border-top:1px solid #EBD08A}
@@ -137,7 +137,7 @@ const estTotal=()=>sel('estacao').reduce((s,p)=>s+(calcEst(p,Q[p.id])||0),0);
 const waNum=()=>{let n=String(V&&V.whatsapp||'').replace(/\D/g,'');if(n.length===10||n.length===11)n='55'+n;return n.length>=12?n:''};
 function card(p){const q=Q[p.id]||0;const est=p.tipo==='estacao';const cob=cobOk(p);const et=cob?calcEst(p,q):null;
  return`<div class="p ${q?'on':''}" id="p-${esc(p.id)}"><div class="ft">${fotoOk(p.foto)?`<img src="${p.foto}" alt="">`:esc((p.nome||'?').trim()[0]||'?').toUpperCase()}</div>
- <div><b>${esc(p.nome)}</b>${p.desc?`<span class="d">${esc(p.desc)}</span>`:''}${!est&&p.min>1?`<span class="tag">Pedido mínimo: ${p.min} unidades</span>`:''}${est&&!cob&&p.mp>0?`<span class="tag">Mínimo de ${p.mp} pessoas</span>`:''}
+ <div><b>${esc(p.nome)}</b>${p.desc?`<span class="d">${esc(p.desc)}</span>`:''}${!est&&p.min>1?`<span class="tag">Mínimo: ${p.min} unidades</span>`:''}${est&&!cob&&p.mp>0?`<span class="tag">Mínimo de ${p.mp} pessoas</span>`:''}
  <div class="row"><span class="v">${p.rotulo?esc(p.rotulo):est?(p.preco>0?'a partir de '+brl(p.preco):'Sob consulta'):brl(p.preco)}</span>
  ${cob?`<span class="qt"><button data-m="${esc(p.id)}" aria-label="Menos">−</button><input type="number" inputmode="numeric" min="0" max="5000" value="${q||''}" placeholder="0" data-q="${esc(p.id)}" aria-label="Pessoas para ${esc(p.nome)}"><button data-a="${esc(p.id)}" aria-label="Mais">+</button></span>`:est?`<button class="btn wa" data-orc="${esc(p.id)}">Solicite orçamento</button>`:est?`<button class="btn ${q?'sel':''}" data-est="${esc(p.id)}">${q?'Selecionado':'Quero orçamento'}</button>`
  :`<span class="qt"><button data-m="${esc(p.id)}" aria-label="Menos">−</button><input type="number" inputmode="numeric" min="0" max="5000" value="${q||''}" placeholder="0" data-q="${esc(p.id)}" aria-label="Quantidade de ${esc(p.nome)}"><button data-a="${esc(p.id)}" aria-label="Mais">+</button></span>`}</div>${cob?`<div class="estc">${q?(et!=null?`${q} ${q===1?'pessoa':'pessoas'} · <b>${brl(et)}</b> estimado`:`${q} pessoas · valor sob consulta`):'Informe o número de pessoas para ver o valor'}</div>`:''}</div></div>`}
@@ -160,9 +160,9 @@ function lista(){const cs=cats();
   $('#main').innerHTML=`<button class="back" data-volta>‹ Voltar para ${esc(nomeCat(VIEW))}</button><div class="crumb">${esc(nomeCat(VIEW))} › ${esc(GRP)}</div><h2>${esc(GRP)}</h2><p class="h2s">${gp.length} opções. ${sub}</p><div class="grid">${gp.map(card).join('')}</div><button class="back back2" data-volta>‹ Ver outros produtos de ${esc(nomeCat(VIEW))}</button>`;
   document.querySelectorAll('[data-volta]').forEach(b=>b.onclick=()=>{GRP=null;lista();window.scrollTo(0,0)});barra();return}
  $('#main').innerHTML=(cs.length>1?`<button class="back" id="volta">‹ Voltar para todas as categorias</button>`:'')+`<h2>${esc(nomeCat(VIEW))}</h2><p class="h2s">${gs.length?'Toque em um grupo para ver todas as opções.':sub}</p>`
-  +(gs.length?`<div class="cats">${gs.map(([g,a],i)=>{const f=a.find(x=>fotoOk(x.foto));const n=a.filter(x=>Q[x.id]>0).length;const pr=a.map(x=>x.preco).filter(v=>v>0);
-   return`<button class="catb" data-grp="${i}"><span class="ft">${f?`<img src="${f.foto}" alt="">`:esc(g[0]||'?').toUpperCase()}</span><span class="ct"><b>${esc(g)}</b><span class="d">${a.length} opções</span>${pr.length?`<span class="d">a partir de <b class="pr">${brl(Math.min(...pr))}</b></span>`:''}<span class="vo">Ver opções</span>${n?`<span class="tag">${n} no pedido</span>`:''}</span><span class="go">›</span></button>`}).join('')}</div>`:'')
-  +(soltos.length?`<div class="grid"${gs.length?' style="margin-top:14px"':''}>${soltos.map(card).join('')}</div>`:'');
+  +`<div class="grid">`+(gs.length?`${gs.map(([g,a],i)=>{const f=a.find(x=>fotoOk(x.foto));const n=a.filter(x=>Q[x.id]>0).length;const pr=a.map(x=>x.preco).filter(v=>v>0);
+   return`<button class="catb" data-grp="${i}"><span class="ft">${f?`<img src="${f.foto}" alt="">`:esc(g[0]||'?').toUpperCase()}</span><span class="ct"><b>${esc(g)}</b><span class="d">${a.length} opções</span>${pr.length?`<span class="d">a partir de <b class="pr">${brl(Math.min(...pr))}</b></span>`:''}<span class="vo">Ver opções</span>${n?`<span class="tag">${n} no pedido</span>`:''}</span><span class="go">›</span></button>`}).join('')}`:'')
+  +soltos.map(card).join('')+`</div>`;
  window._gs=gs.map(g=>g[0]);
  const v=$('#volta');if(v)v.onclick=()=>{VIEW=null;GRP=null;lista();window.scrollTo(0,0)};
  barra()}
@@ -286,6 +286,7 @@ function fim(r){Q={};enviando=false;$('#bar').hidden=true;$('#ov').innerHTML='';
  try{const r=await sb.from('vitrine').select('loja_id,dados').eq('slug',SLUG).limit(1);if(r.error||!r.data||!r.data[0])throw 0;LOJA=r.data[0].loja_id;V=r.data[0].dados||{};cab();lista()}
  catch(e){$('#main').innerHTML='<div class="center">O catálogo não está disponível no momento. Tente de novo em instantes.</div>'}
 })();
+document.addEventListener('click',e=>{const d=e.target.closest&&e.target.closest('.p .d');if(d)d.classList.toggle('full')});
 </script>
 </body>
 </html>
