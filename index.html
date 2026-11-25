@@ -827,9 +827,11 @@ const slugify=t=>String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').t
 async function carregarSlug(){SLUG_SITE='';if(!NUVEM||!LOJA)return;try{const r=await sb.from('vitrine').select('slug').eq('loja_id',LOJA).limit(1);if(r.error)return;if(r.data&&r.data[0]&&r.data[0].slug){SLUG_SITE=r.data[0].slug;return}let sl=slugify(LOJA_NOME)||'loja';const c=await sb.from('vitrine').select('loja_id').eq('slug',sl).limit(1);if(c.data&&c.data[0])sl=sl+'-'+String(LOJA).slice(0,4);SLUG_SITE=sl}catch(e){}}
 const siteNovos=()=>SITE.filter(x=>x.status==='novo');
 function siteBanner(){const n=siteNovos().length;return n?`<div class="car-banner" style="margin-bottom:12px"><div><div class="t">${n} pedido${n>1?'s':''} novo${n>1?'s':''} pelo site</div><div class="s">Abra para aceitar ou recusar. Ao aceitar, ele entra na agenda.</div></div><button class="btn" onclick="go('online')">${ico('online')}Ver pedidos</button></div>`:''}
+const sinalNatal=()=>{const v=CFG().sinalNatal;return v===undefined||v===''?30:+v};
+const sinalDe=p=>p&&p.natal?sinalNatal():+CFG().sinalPct;
 function vitrineDados(){const c=CFG();
  const ps=S.produtos.filter(p=>p.ativo!==false).map(p=>{const fs=frentesDe(p);if(fs.length&&!fs.includes('encomenda')&&!fs.includes('estacao'))return null;const tipo=fs.includes('estacao')&&!fs.includes('encomenda')?'estacao':'encomenda';if(tipo==='estacao'?p.catalogo===false:!noCatalogo(p))return null;if(p.natal&&!c.natalSite)return null;return{id:p.id,nome:p.nome,desc:p.desc||'',preco:+p.preco||0,foto:p.foto||'',cat:p.natal?'Natal':(p.cat||''),grupo:p.natal?'':(p.grupo||''),natal:!!p.natal,rotulo:p.precoRotulo||'',cob:'',fx:[],mp:+p.minPes||0,tipo,min:Math.max(0,Math.round(+p.minimo||0))}}).filter(Boolean).sort((a,b)=>(b.natal?1:0)-(a.natal?1:0));
- return{marca:c.marca||c.empresa||'',sub:c.marcaSub??'CONFEITARIA',logo:c.logo||'',whatsapp:c.whatsapp||'',instagram:c.instagram||'',aviso:c.avisoSite??AVISO_SITE,sinal:+c.sinalPct||50,produtos:ps}}
+ return{marca:c.marca||c.empresa||'',sub:c.marcaSub??'CONFEITARIA',logo:c.logo||'',whatsapp:c.whatsapp||'',instagram:c.instagram||'',aviso:c.avisoSite??AVISO_SITE,sinal:+c.sinalPct||50,sinalNatal:sinalNatal(),produtos:ps}}
 async function publicarVitrine(){if(!NUVEM||!LOJA||!SITE_OK||!SLUG_SITE)return;const d=vitrineDados(),t=canon(d);if(t===_vit)return;try{const r=await sb.from('vitrine').upsert([{loja_id:LOJA,slug:SLUG_SITE,dados:d,atualizado_em:new Date().toISOString()}]);if(!r.error)_vit=t}catch(e){}}
 async function carregarSite(){if(!NUVEM||!LOJA)return;try{const r=await sb.from('pedidos_site').select('id,criado_em,status,dados').eq('loja_id',LOJA).order('criado_em',{ascending:false}).limit(60);if(r.error)return;const era=SITE_OK;SITE_OK=true;const a=canon(SITE.map(x=>[x.id,x.status]));SITE=r.data||[];if(!era||canon(SITE.map(x=>[x.id,x.status]))!==a){if($('#modal-root').innerHTML)_remoto=true;else render()}}catch(e){}}
 function siteCard(x){const d=x.dados||{};const est=d.tipo==='estacao';const its=Array.isArray(d.itens)?d.itens:[];const tot=its.reduce((s,i)=>s+(+i.q||0)*((getProd(i.p)||{}).preco||0),0);const quando=String(x.criado_em||'').slice(0,10);
@@ -850,7 +852,7 @@ function waLink(fone,texto){let n=String(fone||'').replace(/\D/g,'');if(n.length
 function msgSite(x){const d=x.dados||{};const c=CFG();const nome=String(d.nome||'').trim().split(/\s+/)[0]||'';const doc=[...S.pedidos,...S.orcamentos].find(o=>o.origemSite===x.id);const fim=`\n\n${c.empresa}${c.instagram?' · '+c.instagram:''}`;
  if(x.status==='recusado')return`Olá, ${nome}! Recebemos o seu pedido pelo nosso site, mas infelizmente não vamos conseguir atender${/^\d{4}-\d{2}-\d{2}$/.test(d.data||'')?' no dia '+dBR(d.data):''}. Se quiser, me chama aqui que a gente vê outra data ou outra opção para você.${fim}`;
  if(doc&&frenteDe(doc)==='estacao')return`Olá, ${nome}! Recebemos o seu pedido de orçamento da Estação Gourmet para ${dBR(doc.dataEntrega)}${doc.endereco?', em '+doc.endereco:''}. Vou preparar o orçamento e te envio por aqui em seguida.${fim}`;
- if(doc&&S.pedidos.includes(doc)){const t=totaisDoc(doc);const sinal=t.total*CFG().sinalPct/100;
+ if(doc&&S.pedidos.includes(doc)){const t=totaisDoc(doc);const sinal=t.total*sinalDe(doc)/100;
   return`Olá, ${nome}! Seu pedido #${doc.num} na ${c.empresa} está confirmado.\n\n${doc.modo==='entrega'?'Entrega por Uber':'Retirada'}: ${SEMLONGO[toDate(doc.dataEntrega).getDay()]}, ${dBR(doc.dataEntrega)} às ${doc.hora}${doc.modo==='entrega'&&doc.endereco?`\nEndereço: ${doc.endereco}`:''}\n\n${linhasItens(doc)}\n${doc.frete?`\nEntrega: ${brl(doc.frete)}`:''}\n*Total: ${brl(t.total)}*${doc.modo==='entrega'&&!doc.frete?'\nA taxa do Uber é por sua conta e eu te informo o valor no dia.':''}\n\nPara garantir a data, o sinal é de ${nq(CFG().sinalPct)}% (${brl(sinal)})${c.pix&&c.pix!=='chave Pix da Sweet Ka'?`, pelo Pix ${c.pix}`:''}. O restante fica para a ${doc.modo==='entrega'?'entrega':'retirada'}.${fim}`}
  return`Olá, ${nome}! Recebemos o seu pedido pelo nosso site e já estamos cuidando dele.${fim}`}
 function botaoWa(x,pri){const l=waLink((x.dados||{}).fone,msgSite(x));return l?`<a class="btn ${pri?'pri':''}" href="${esc(l)}" target="_blank" rel="noopener">Avisar a cliente no WhatsApp</a>`:`<button class="btn" onclick="copiarTexto(msgSite(SITE.find(s=>s.id==='${x.id}')))">${ico('copy')}Copiar mensagem para a cliente</button>`}
@@ -1349,7 +1351,7 @@ function verPedido(id){
 function mudarStatus(id,st,forcar){
  const p=S.pedidos.find(x=>x.id===id);const t=totaisDoc(p);
  if(st==='entregue'&&t.saldo>0.009&&!forcar)return perguntaPag(id,st,+t.saldo.toFixed(2),'Saldo',`Falta receber ${brl(t.saldo)} deste pedido. A cliente já te pagou?`,'Ainda não, entregar mesmo assim');
- if(st==='confirmado'&&t.pago<0.01&&!forcar)return perguntaPag(id,st,+(t.total*CFG().sinalPct/100).toFixed(2),'Sinal',`O sinal deste pedido é ${brl(t.total*CFG().sinalPct/100)}. A cliente já te pagou?`,'Ainda não recebi, confirmar mesmo assim');
+ if(st==='confirmado'&&t.pago<0.01&&!forcar)return perguntaPag(id,st,+(t.total*sinalDe(p)/100).toFixed(2),'Sinal',`O sinal deste pedido é ${brl(t.total*sinalDe(p)/100)}. A cliente já te pagou?`,'Ainda não recebi, confirmar mesmo assim');
  if(['producao','pronto','entregue'].includes(st)&&!p.baixado){baixaEstoque(p,-1);p.baixado=true}
  p.status=st;save();toast(`Pedido #${p.num}: ${(frenteDe(p)==='estacao'?STE:STP)[st].toLowerCase()}`);closeModal();render();const q=_q;_q=false;if(st!=='entregue'&&!q)verPedido(id);
 }
@@ -2096,7 +2098,7 @@ R.config=()=>{const c=CFG();const f=(id,l,v,h='',hide)=>`<label class="f" ${hide
   ${f('custoHora','Valor da hora de trabalho (R$)',c.custoHora,'',!modOn('ficha'))}${f('indireto','Custos indiretos (%)',c.indireto,'gás, energia, água sobre materiais',!modOn('ficha'))}
   <label class="f" ${modOn('estoque')?'':'hidden'}>Atualização do custo nas compras<select id="cf-custoMetodo"><option value="medio" ${(c.custoMetodo||'medio')==='medio'?'selected':''}>Custo médio ponderado</option><option value="ultimo" ${c.custoMetodo==='ultimo'?'selected':''}>Preço da última compra</option></select></label></div></div>
  <div class="card"><h3>Operação e empresa</h3><div class="frow">
-  ${f('capacidade','Capacidade de produção (doces/dia)',c.capacidade,'',!modOn('capacidade'))}${f('sinalPct','Sinal padrão (%)',c.sinalPct)}${f('validade','Validade do orçamento (dias)',c.validade)}
+  ${f('capacidade','Capacidade de produção (doces/dia)',c.capacidade,'',!modOn('capacidade'))}${f('sinalPct','Sinal padrão (%)',c.sinalPct)}${f('sinalNatal','Sinal das encomendas de Natal (%)',sinalNatal())}${f('validade','Validade do orçamento (dias)',c.validade)}
   <label class="f">Nome da empresa<input type="text" id="cf-empresa" value="${esc(c.empresa)}"></label><label class="f">Instagram<input type="text" id="cf-instagram" value="${esc(c.instagram)}"></label><label class="f">WhatsApp<input type="text" id="cf-whatsapp" value="${esc(c.whatsapp)}"></label></div></div></div>
  <div class="card" style="margin-top:16px"><h3>PDF de orçamentos e pedidos</h3>
   <div class="grid g2"><div class="frow">
@@ -2142,7 +2144,7 @@ function zerar(tudo){
  if(tudo){S.insumos=[];S.receitas=[];S.produtos=[]}else for(const i of S.insumos)i.estoque=0;
  save();closeModal();go('painel');toast(tudo?'Sistema zerado. Comece cadastrando os seus produtos.':'Movimentações apagadas');
 }
-function salvarCfg(){const c=CFG();c.custoMetodo=$('#cf-custoMetodo').value;for(const k of['margemAlvo','margemMin','imposto','taxaDebito','taxaCredito','custoHora','indireto','capacidade','sinalPct','validade'])c[k]=num($('#cf-'+k).value);
+function salvarCfg(){const c=CFG();c.custoMetodo=$('#cf-custoMetodo').value;for(const k of['margemAlvo','margemMin','imposto','taxaDebito','taxaCredito','custoHora','indireto','capacidade','sinalPct','sinalNatal','validade'].filter(k=>$('#cf-'+k)))c[k]=num($('#cf-'+k).value);
  c.taxa=c.taxaCredito;if(c.margemAlvo+c.imposto+c.taxaCredito>=100)return toast('Margem, impostos e taxas somados precisam ficar abaixo de 100%.','bad');
  for(const k of['empresa','instagram','whatsapp','marca','marcaSub','pix','agradecimento','avisoSite'])c[k]=$('#cf-'+k).value.trim();save();render();toast('Configurações salvas')}
 
@@ -2293,7 +2295,7 @@ function gerarPDF(kind,id,modo){
  const tot=[['Subtotal',brl(t.sub)]];if(o.desconto)tot.push(['Desconto','- '+brl(o.desconto)]);if(o.frete)tot.push(['Taxa de entrega',brl(o.frete)]);
  const cond=[];const pix=c.pix&&c.pix!=='chave Pix da Sweet Ka'?c.pix:'';
  if(isOrc){const sp=o.sinalPct||c.sinalPct;cond.push(`Para reservar a data, sinal de ${nq(sp)}% (${brl(t.total*sp/100)}).`,frenteDe(o)==='estacao'?`Saldo de ${brl(t.total-t.total*sp/100)} até 1 dia antes do evento.`:`Saldo de ${brl(t.total-t.total*sp/100)} na ${o.modo==='entrega'?'entrega':'retirada'}.`,`Orçamento válido até ${dBR(o.validade)}. A data fica garantida após a confirmação do sinal.`);if(pix)cond.push(`Pagamento via Pix: ${pix}`)}
- else{for(const g of o.pagamentos||[])cond.push(`${dBR(g.data)}: ${g.tipo} de ${brl(g.valor)} (${g.forma})`);if(!(o.pagamentos||[]).length)cond.push(`Aguardando o sinal de ${nq(c.sinalPct)}% (${brl(t.total*c.sinalPct/100)}) para confirmar a data.`);if(t.saldo>0.009&&pix)cond.push(`Pagamento via Pix: ${pix}`)}
+ else{for(const g of o.pagamentos||[])cond.push(`${dBR(g.data)}: ${g.tipo} de ${brl(g.valor)} (${g.forma})`);if(!(o.pagamentos||[]).length)cond.push(`Aguardando o sinal de ${nq(sinalDe(o))}% (${brl(t.total*sinalDe(o)/100)}) para confirmar a data.`);if(t.saldo>0.009&&pix)cond.push(`Pagamento via Pix: ${pix}`)}
  const condW=R-M-92;font('normal',9.2,PC.ink);const condL=cond.map(s=>doc.splitTextToSize(s,condW-6));const condH=10+condL.reduce((s,l)=>s+l.length*4.3+2.2,0);
  const totH=tot.length*6.5+14+(isOrc?0:14);
  if(y+Math.max(condH,totH)>FOOT-6)novaPagina();

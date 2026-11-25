@@ -200,7 +200,7 @@ document.addEventListener('change',e=>{if(e.target.dataset&&e.target.dataset.q)s
 document.addEventListener('input',e=>{const id=e.target.dataset&&e.target.dataset.q;if(!id)return;const p=prods().find(x=>x.id===id);if(!cobOk(p))return;const q=Math.max(0,Math.min(5000,Math.round(+e.target.value||0)));if(q)Q[id]=q;else delete Q[id];const c=document.querySelector('#p-'+CSS.escape(id)+' .estc');const et=calcEst(p,q);if(c)c.innerHTML=q?(et!=null?`${q} ${q===1?'pessoa':'pessoas'} · <b>${brl(et)}</b> estimado`:`${q} pessoas · valor sob consulta`):'Informe o número de pessoas para ver o valor';barra()});
 $('#bar-b').onclick=form;
 function hojeISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
-let MODO='retirada',OKSINAL=false;const sinalPct=()=>{const n=Math.round(+(V&&V.sinal));return n>0&&n<=100?n:50};
+let MODO='retirada',OKSINAL=false;const sinalPct=()=>{const ps=((V&&V.produtos)||[]).filter(p=>(Q[p.id]||0)>0&&p.tipo!=='estacao');const nat=ps.length>0&&ps.every(p=>p.natal)&&V.sinalNatal!=null;const n=Math.round(+(nat?V.sinalNatal:(V&&V.sinal)));return n>=0&&n<=100&&!isNaN(n)?(n||(nat?0:50)):50};
 function form(){const ne=sel('encomenda'),ns=sel('estacao');if(!ne.length&&!ns.length)return;MODO='retirada';OKSINAL=false;
  $('#ov').innerHTML=`<div class="ov" id="ovb"><div class="sheet" role="dialog" aria-label="Finalizar pedido">
  <h3>Finalizar pedido</h3><div class="note" style="margin-top:0">Preencha seus dados para a gente confirmar com você.</div>
